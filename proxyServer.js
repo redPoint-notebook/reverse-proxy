@@ -6,6 +6,7 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 let docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
+
 let containerId;
 let IPAddress;
 let sessions = {};
@@ -20,34 +21,48 @@ const proxy = httpProxy.createProxyServer({
 });
 
 const proxyServer = http.createServer((req, res) => {
-  debugger;
   console.log("Request headers host :" + req.headers.host);
+  console.log("Request url: " + req.url);
 
-  if (req.headers.host !== ROOT && !sessions[req.headers.host]) {
-    res.writeHead(404);
-    return res.end();
-  }
+  if (req.headers.host === ROOT) {
 
-  if (req.headers.host === ROOT && req.method === "GET") {
-    console.log("GET request received");
+    if (req.url === '/favicon.ico') {
+      res.writeHead(404);
+      return res.end();
+    }
+
+    if (req.url !== '/' && !sessions[req.url]) {
+      res.writeHead(404);
+      return res.end();
+    }
+
+    console.log("ROOT path reached");
+
+
+    if (req.method === "DELETE") {
+      console.log("DELETE request received");
+      console.log("removing container with id: " + containerId);
+
+      docker.getContainer(containerId).remove({ force: true });
+      return res.end("Container deleted");
+    }
 
     let sessionId = uuidv4().slice(0, 6);
     const html = require("fs").readFileSync(__dirname + "/redirect.html", {
       encoding: "utf-8"
     });
 
-    const sessionURL = `${sessionId}.${ROOT}`;
-    // const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
-    const interpolatedHtml = html.replace("${}", `http://${ROOT}:${PORT}`);
+    const sessionURL = `${ROOT}/${sessionId}`;
+    const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
 
     res.end(interpolatedHtml);
 
     const options = {
       Image: "csgdocker/one-server",
-      PortBindings: {
-        "8000/tcp": [{ HostPort: "8000" }]
-      }
-      // ExposedPorts: { "8000/tcp": {} }
+      // PortBindings: {
+      //   "8000/tcp": [{ HostPort: "8000" }]
+      // }
+      ExposedPorts: { "8000/tcp": {} }
     };
 
     docker.createContainer(options, (err, container) => {
@@ -61,7 +76,7 @@ const proxyServer = http.createServer((req, res) => {
           console.log("IP address of this container is: " + IPAddress);
 
           const containerURL = `http://${IPAddress}:${PORT}`;
-          sessions[sessionURL] = {
+          sessions[`/${sessionId}`] = {
             ip: containerURL,
             containerId
           };
@@ -70,22 +85,14 @@ const proxyServer = http.createServer((req, res) => {
         });
       });
     });
+  } else {
+    proxy.web(req, res, { target: sessions[req.url].ip }, e => {
+      debugger;
+      console.log('inside proxy!');
+    });
   }
 
-  // proxy.web(req, res, { target: sessions[req.headers.host].ip }, e =>
-  //   log_error(e, req)
-  // );
-
-
-  if (req.method === "DELETE") {
-    console.log("DELETE request received");
-    console.log("removing container with id: " + containerId);
-
-    docker.getContainer(containerId).remove({ force: true });
-    return res.end("Container deleted");
-  }
 });
-
 proxyServer.listen(80, () => {
   console.log("Listening on port 80...");
 });

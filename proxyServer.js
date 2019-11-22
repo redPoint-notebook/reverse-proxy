@@ -10,6 +10,8 @@ const proxyServer = http.createServer((req, res) => {
   if (req.method === "GET") {
     console.log("Request headers host :" + req.headers.host);
   }
+
+  res.end("hello world");
 });
 
 proxyServer.listen(80);

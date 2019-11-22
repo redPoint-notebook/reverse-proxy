@@ -20,8 +20,15 @@ const proxy = httpProxy.createProxyServer({
 });
 
 const proxyServer = http.createServer((req, res) => {
+  debugger;
   console.log("Request headers host :" + req.headers.host);
-  if (req.headers.host === ROOT) {
+
+  if (req.headers.host !== ROOT && !sessions[req.headers.host]) {
+    res.writeHead(404);
+    return res.end();
+  }
+
+  if (req.headers.host === ROOT && req.method === "GET") {
     console.log("GET request received");
 
     let sessionId = uuidv4().slice(0, 6);
@@ -30,15 +37,17 @@ const proxyServer = http.createServer((req, res) => {
     });
 
     const sessionURL = `${sessionId}.${ROOT}`;
-    const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
+    // const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
+    const interpolatedHtml = html.replace("${}", `http://${ROOT}:${PORT}`);
+
     res.end(interpolatedHtml);
 
     const options = {
       Image: "csgdocker/one-server",
-      // PortBindings: {
-      //   "8000/tcp": [{ HostPort: "8000" }]
-      // }
-      ExposedPorts: { "8000/tcp": {} }
+      PortBindings: {
+        "8000/tcp": [{ HostPort: "8000" }]
+      }
+      // ExposedPorts: { "8000/tcp": {} }
     };
 
     docker.createContainer(options, (err, container) => {
@@ -61,12 +70,12 @@ const proxyServer = http.createServer((req, res) => {
         });
       });
     });
-  } else {
-    console.log("inside else!")
-    proxy.web(req, res, { target: sessions[req.headers.host].ip }, e =>
-      log_error(e, req)
-    );
   }
+
+  // proxy.web(req, res, { target: sessions[req.headers.host].ip }, e =>
+  //   log_error(e, req)
+  // );
+
 
   if (req.method === "DELETE") {
     console.log("DELETE request received");

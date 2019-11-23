@@ -15,40 +15,37 @@ const ROOT2 = "redpointnotebook.club"
 const PORT = 8000;
 
 const proxy = httpProxy.createProxyServer({
-  secure: true,
+  // secure: true,
   ws: true,
   followRedirects: true
 });
 
 const proxyServer = http.createServer((req, res) => {
   console.log("Request headers host: " + req.headers.host);
+  // console.log("Headers: ", req.headers);
 
   const host = req.headers.host
 
   if (req.method === "DELETE") {
-    console.log("DELETE request received");
-    console.log("removing container with id: " + containerId);
+    console.log("From delete: ", sessions, req.headers);
 
+    const containerId = sessions[req.headers.host].containerId;
     docker.getContainer(containerId).remove({ force: true });
-    return res.end("Container deleted");
+    delete sessions[req.headers.host];
+    res.writeHead(202);
+    return res.end("DELETED");
   }
 
   if (host !== ROOT && !sessions[host]) {
     res.writeHead(404)
     return res.end()
   }
+
   if (host === ROOT) {
-
-    // if (req.url === '/favicon.ico') {
-    //   res.writeHead(404);
-    //   return res.end();
-    // }
-
     console.log("host is ROOT");
 
-
     let sessionId = uuidv4().slice(0, 6);
-    const html = require("fs").readFileSync(__dirname + "/redirect.html", {
+    const html = fs.readFileSync(__dirname + "/redirect.html", {
       encoding: "utf-8"
     });
 
@@ -76,8 +73,8 @@ const proxyServer = http.createServer((req, res) => {
           console.log("IP address of this container is: " + IPAddress);
 
           const containerURL = `http://${IPAddress}:${PORT}`;
-          sessions[sessionURL] = {
-            ip: containerURL,
+          sessions[sessionURL] = {  // www.asd443.redpoint.com
+            ip: containerURL,  // http://172.11.78:8000
             containerId
           };
 
@@ -94,6 +91,7 @@ const proxyServer = http.createServer((req, res) => {
   proxyServer.on("upgrade", (req, socket, head) => {
     proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
   });
+
 });
 proxyServer.listen(80, () => {
   console.log("Listening on port 80...");

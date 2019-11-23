@@ -6,7 +6,6 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 let docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
-
 let containerId;
 let IPAddress;
 let sessions = {};
@@ -22,7 +21,7 @@ const proxy = httpProxy.createProxyServer({
 });
 
 const proxyServer = http.createServer((req, res) => {
-  console.log("Request headers host :" + req.headers.host);
+  console.log("Request headers host: " + req.headers.host);
 
   const host = req.headers.host
 
@@ -87,11 +86,14 @@ const proxyServer = http.createServer((req, res) => {
       });
     });
   } else {
-    proxy.web(req, res, { target: sessions[req.headers.hostname].ip }, e => {
+    proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {
       console.log('inside proxy!');
     });
   }
 
+  proxyServer.on("upgrade", (req, socket, head) => {
+    proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
+  });
 });
 proxyServer.listen(80, () => {
   console.log("Listening on port 80...");

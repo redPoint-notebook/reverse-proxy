@@ -11,7 +11,8 @@ let containerId;
 let IPAddress;
 let sessions = {};
 
-const ROOT = "167.99.145.236";
+const ROOT = "www.redpointnotebook.club";
+const ROOT2 = "redpointnotebook.club"
 const PORT = 8000;
 
 const proxy = httpProxy.createProxyServer({
@@ -22,37 +23,37 @@ const proxy = httpProxy.createProxyServer({
 
 const proxyServer = http.createServer((req, res) => {
   console.log("Request headers host :" + req.headers.host);
-  console.log("Request url: " + req.url);
 
-  if (req.headers.host === ROOT) {
+  const host = req.headers.host
 
-    if (req.url === '/favicon.ico') {
-      res.writeHead(404);
-      return res.end();
-    }
+  if (req.method === "DELETE") {
+    console.log("DELETE request received");
+    console.log("removing container with id: " + containerId);
 
-    if (req.url !== '/' && !sessions[req.url]) {
-      res.writeHead(404);
-      return res.end();
-    }
+    docker.getContainer(containerId).remove({ force: true });
+    return res.end("Container deleted");
+  }
 
-    console.log("ROOT path reached");
+  if (host !== ROOT && !sessions[host]) {
+    res.writeHead(404)
+    return res.end()
+  }
+  if (host === ROOT) {
 
+    // if (req.url === '/favicon.ico') {
+    //   res.writeHead(404);
+    //   return res.end();
+    // }
 
-    if (req.method === "DELETE") {
-      console.log("DELETE request received");
-      console.log("removing container with id: " + containerId);
+    console.log("host is ROOT");
 
-      docker.getContainer(containerId).remove({ force: true });
-      return res.end("Container deleted");
-    }
 
     let sessionId = uuidv4().slice(0, 6);
     const html = require("fs").readFileSync(__dirname + "/redirect.html", {
       encoding: "utf-8"
     });
 
-    const sessionURL = `${ROOT}/${sessionId}`;
+    const sessionURL = `www.${sessionId}.${ROOT2}`;
     const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
 
     res.end(interpolatedHtml);
@@ -76,7 +77,7 @@ const proxyServer = http.createServer((req, res) => {
           console.log("IP address of this container is: " + IPAddress);
 
           const containerURL = `http://${IPAddress}:${PORT}`;
-          sessions[`/${sessionId}`] = {
+          sessions[sessionURL] = {
             ip: containerURL,
             containerId
           };
@@ -86,8 +87,7 @@ const proxyServer = http.createServer((req, res) => {
       });
     });
   } else {
-    proxy.web(req, res, { target: sessions[req.url].ip }, e => {
-      debugger;
+    proxy.web(req, res, { target: sessions[req.headers.hostname].ip }, e => {
       console.log('inside proxy!');
     });
   }

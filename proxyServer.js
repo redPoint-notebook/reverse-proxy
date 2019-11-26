@@ -135,8 +135,6 @@ const proxyServer = http.createServer((req, res) => {
     if (req.method === "POST" && req.url === "/update") {
       // load notebook from session state if stashed notebookId
       saveNotebook(req, res);
-    } else if (req.url === '/loadNotebook' && req.method === 'GET') {
-      loadNotebook(req, res, sessions);
     } else if (req.method === "DELETE") {
       // server.js issues delete request to tear down a container session
       tearDown(req, res);
@@ -145,9 +143,12 @@ const proxyServer = http.createServer((req, res) => {
       startNewSession(req, res);
     }
   } else if (host !== ROOT) {
+    console.log("HOST :", host);
     if (!sessions[host]) {
       res.writeHead(404);
       return res.end();
+    } else if (req.url === '/loadNotebook' && req.method === 'GET') {
+      loadNotebook(req, res, sessions);
     } else {
       proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {
         // console.log("inside proxy!");

@@ -22,13 +22,15 @@ const proxy = httpProxy.createProxyServer({
   followRedirects: true
 });
 
-const saveNotebook = (req, res) => {
+const saveNotebook = (req, res, sessions) => {
+
   let body = "";
   req.on("data", chunk => {
     body += chunk;
   });
   req.on("end", () => {
     const notebookData = JSON.parse(body);
+    sessions[req.headers.host].notebookId = notebookData.id;
     db("SAVE", notebookData, notebookData.id).then(data => {
       console.log(data);
       res.setHeader('Access-Control-Allow-Origin', '*');
@@ -92,7 +94,7 @@ const startNewSession = (req, res) => {
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "csgdocker/load-state",
+    Image: "csgdocker/save-to-subdomain",
     // PortBindings: {  
     //   "8000/tcp": [{ HostPort: "8000" }]
     // }
@@ -137,10 +139,7 @@ const proxyServer = http.createServer((req, res) => {
     console.log("Host : ", host);
     console.log("===================================");
 
-    if (req.method === "POST" && req.url === "/update") {
-      // load notebook from session state if stashed notebookId
-      saveNotebook(req, res);
-    } else if (req.method === "DELETE") {
+    if (req.method === "DELETE") {
       // server.js issues delete request to tear down a container session
       tearDown(req, res);
     } else if (req.method === "GET") {
@@ -153,7 +152,10 @@ const proxyServer = http.createServer((req, res) => {
     console.log("Inside host !== ROOT")
     console.log("HOST :", host);
     console.log("===================================");
-    if (!sessions[host]) {
+    if (req.method === "POST" && req.url === "/update") {
+      // load notebook from session state if stashed notebookId
+      saveNotebook(req, res, sessions);
+    } else if (!sessions[host]) {
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {

@@ -69,7 +69,6 @@ const tearDown = (req, res) => {
 }
 
 const startNewSession = (req, res) => {
-  console.log("host is ROOT");
   // console.log("req.headers.host => ", req.headers.host);
 
   const matchData = req.url.match(/\/notebooks\/(.*)/);
@@ -93,8 +92,8 @@ const startNewSession = (req, res) => {
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "csgdocker/redpoint:latest",
-    // PortBindings: {
+    Image: "csgdocker/load-state",
+    // PortBindings: {  
     //   "8000/tcp": [{ HostPort: "8000" }]
     // }
     ExposedPorts: { "8000/tcp": {} }
@@ -107,7 +106,7 @@ const startNewSession = (req, res) => {
     container.start((err, data) => {
       if (err) console.log(err);
       container.inspect(container.id).then(data => {
-        IPAddress = data.NetworkSettings.IPAddress;
+        const IPAddress = data.NetworkSettings.IPAddress;
         console.log("IP address of this container is: " + IPAddress);
 
         const containerURL = `http://${IPAddress}:${PORT}`;
@@ -115,7 +114,7 @@ const startNewSession = (req, res) => {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000
           containerId,
-          notebookId
+          notebookId: (notebookId || null)
         };
 
         console.log("Sessions object: " + JSON.stringify(sessions));
@@ -128,10 +127,16 @@ const proxyServer = http.createServer((req, res) => {
   // console.log("Request headers host: " + req.headers.host);
 
   const host = req.headers.host;
+  // www.redpointnotebook.com
+  // www.123abc.redpointnotebook.com
 
-  console.log("Req Url : ", req.url);
 
   if (host === ROOT) {
+    console.log("===================================");
+    console.log("Inside host === ROOT");
+    console.log("Host : ", host);
+    console.log("===================================");
+
     if (req.method === "POST" && req.url === "/update") {
       // load notebook from session state if stashed notebookId
       saveNotebook(req, res);
@@ -143,25 +148,35 @@ const proxyServer = http.createServer((req, res) => {
       startNewSession(req, res);
     }
   } else if (host !== ROOT) {
+    // host === subdomained url
+    console.log("===================================");
+    console.log("Inside host !== ROOT")
     console.log("HOST :", host);
+    console.log("===================================");
     if (!sessions[host]) {
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {
       loadNotebook(req, res, sessions);
     } else {
+      console.log("inside proxy!");
       proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {
-        // console.log("inside proxy!");
       });
     }
   }
 });
 
+proxyServer.on("upgrade", (req, socket, head) => {
+  console.log("===================================");
+  console.log("Inside on('upgrade')")
+  console.log("sessions[req.headers.host].ip : ", sessions[req.headers.host].ip)
+  console.log("===================================");
+  proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
+});
+
+
 proxyServer.listen(80, () => {
   console.log("Listening on port 80...");
 });
 
-proxyServer.on("upgrade", (req, socket, head) => {
-  proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
-});
 

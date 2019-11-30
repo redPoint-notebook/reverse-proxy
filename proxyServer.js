@@ -22,14 +22,57 @@ const proxy = httpProxy.createProxyServer({
   followRedirects: true
 });
 
-const saveNotebook = (req, res, sessions) => {
+// const saveNotebook = (req, res, sessions) => {
+//   let body = "";
+//   req.on("data", chunk => {
+//     body += chunk;
+//   });
+//   req.on("end", () => {
+//     const notebookData = JSON.parse(body);
+//     sessions[req.headers.host].notebookId = notebookData.id;
+//     db("SAVE", notebookData, notebookData.id).then(data => {
+//       console.log(data);
+//       res.setHeader('Access-Control-Allow-Origin', '*');
+//       res.end("Save success!");
+//     }).catch(err => {
+//       res.setHeader('Access-Control-Allow-Origin', '*');
+//       res.end(null);
+//     })
+//   });
+// };
+
+// const cloneNotebook = (req, res, sessions) => {
+//   let body = "";
+//   req.on("data", chunk => {
+//     body += chunk;
+//   });
+//   req.on("end", () => {
+//     const notebookData = JSON.parse(body);
+//     db("SAVE", notebookData, notebookData.id).then(data => {
+//       console.log(data);
+//       res.setHeader('Access-Control-Allow-Origin', '*');
+//       res.end("Save success!");
+//     }).catch(err => {
+//       res.setHeader('Access-Control-Allow-Origin', '*');
+//       res.end(null);
+//     })
+//   });
+// };
+
+const saveOrCloneNotebook = (req, res, sessions) => {
+  const isSave = /save/.test(req.url);
   let body = "";
+
   req.on("data", chunk => {
     body += chunk;
   });
+
   req.on("end", () => {
     const notebookData = JSON.parse(body);
-    sessions[req.headers.host].notebookId = notebookData.id;
+    if (isSave) {
+      sessions[req.headers.host].notebookId = notebookData.id;
+    }
+
     db("SAVE", notebookData, notebookData.id).then(data => {
       console.log(data);
       res.setHeader('Access-Control-Allow-Origin', '*');
@@ -39,26 +82,7 @@ const saveNotebook = (req, res, sessions) => {
       res.end(null);
     })
   });
-};
-
-const cloneNotebook = (req, res, sessions) => {
-  let body = "";
-  req.on("data", chunk => {
-    body += chunk;
-  });
-  req.on("end", () => {
-    const notebookData = JSON.parse(body);
-    db("SAVE", notebookData, notebookData.id).then(data => {
-      console.log(data);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end("Save success!");
-    }).catch(err => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end(null);
-    })
-  });
-};
-
+}
 
 const loadNotebook = (req, res) => {
   console.log("INSIDE LOAD NOTEBOOK");
@@ -167,13 +191,9 @@ const proxyServer = http.createServer((req, res) => {
     console.log("Inside host !== ROOT")
     console.log("HOST :", host);
     console.log("===================================");
-    if (req.method === "POST") {
+    if (req.method === "POST" && (req.url === "/save" || req.url === "/clone") {
       // save or clone notebook
-      if (req.url === "/save") {
-        saveNotebook(req, res, sessions);
-      } else if (req.url === "/clone") {
-        cloneNotebook(req, res, sessions)
-      }
+
     } else if (!sessions[host]) {
       // subdomain is not in the sessions object
       res.writeHead(404);

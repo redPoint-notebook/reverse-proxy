@@ -136,7 +136,7 @@ const startNewSession = (req, res) => {
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "a74dfd57a6de",
+    Image: "324d878fb42c",
     ExposedPorts: { "8000/tcp": {} }
   };
 
@@ -191,9 +191,9 @@ const proxyServer = http.createServer((req, res) => {
     console.log("Inside host !== ROOT")
     console.log("HOST :", host);
     console.log("===================================");
-    if (req.method === "POST" && (req.url === "/save" || req.url === "/clone") {
+    if (req.method === "POST" && (req.url === "/save" || req.url === "/clone")) {
       // save or clone notebook
-
+      saveOrCloneNotebook(req, res, sessions);
     } else if (!sessions[host]) {
       // subdomain is not in the sessions object
       res.writeHead(404);

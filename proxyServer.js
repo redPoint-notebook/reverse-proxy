@@ -93,7 +93,7 @@ const startNewSession = (req, res) => {
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "csgdocker/save-to-subdomain",
+    Image: "14e0d3c50f46",
     ExposedPorts: { "8000/tcp": {} }
   };
 

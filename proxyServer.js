@@ -41,6 +41,25 @@ const saveNotebook = (req, res, sessions) => {
   });
 };
 
+const cloneNotebook = (req, res, sessions) => {
+  let body = "";
+  req.on("data", chunk => {
+    body += chunk;
+  });
+  req.on("end", () => {
+    const notebookData = JSON.parse(body);
+    db("SAVE", notebookData, notebookData.id).then(data => {
+      console.log(data);
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.end("Save success!");
+    }).catch(err => {
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.end(null);
+    })
+  });
+};
+
+
 const loadNotebook = (req, res) => {
   console.log("INSIDE LOAD NOTEBOOK");
   console.log("req.url", req.url);
@@ -93,7 +112,7 @@ const startNewSession = (req, res) => {
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "14e0d3c50f46",
+    Image: "a74dfd57a6de",
     ExposedPorts: { "8000/tcp": {} }
   };
 
@@ -148,10 +167,15 @@ const proxyServer = http.createServer((req, res) => {
     console.log("Inside host !== ROOT")
     console.log("HOST :", host);
     console.log("===================================");
-    if (req.method === "POST" && req.url === "/update") {
-      // save notebook data from client to the db
-      saveNotebook(req, res, sessions);
+    if (req.method === "POST") {
+      // save or clone notebook
+      if (req.url === "/save") {
+        saveNotebook(req, res, sessions);
+      } else if (req.url === "/clone") {
+        cloneNotebook(req, res, sessions)
+      }
     } else if (!sessions[host]) {
+      // subdomain is not in the sessions object
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {

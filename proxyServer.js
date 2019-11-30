@@ -12,8 +12,8 @@ let containerId;
 let IPAddress;
 let sessions = {};
 
-const ROOT = "www.redpointnotebook.com";
-const ROOT2 = "redpointnotebook.com";
+const ROOT = "www.redpointnotebook.club";
+const ROOT2 = "redpointnotebook.club";
 const PORT = 8000;
 
 const proxy = httpProxy.createProxyServer({

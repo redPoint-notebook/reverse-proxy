@@ -23,7 +23,6 @@ const proxy = httpProxy.createProxyServer({
 });
 
 const saveNotebook = (req, res, sessions) => {
-
   let body = "";
   req.on("data", chunk => {
     body += chunk;
@@ -82,12 +81,12 @@ const startNewSession = (req, res) => {
 
   console.log("Notebook ID : ", notebookId);
 
-  let sessionId = uuidv4().slice(0, 6);
 
   const html = fs.readFileSync(__dirname + "/redirect.html", {
     encoding: "utf-8"
   });
 
+  const sessionId = uuidv4().slice(0, 6);
   const sessionURL = `www.${sessionId}.${ROOT2}`;
   const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
 
@@ -95,9 +94,6 @@ const startNewSession = (req, res) => {
 
   const options = {
     Image: "csgdocker/save-to-subdomain",
-    // PortBindings: {  
-    //   "8000/tcp": [{ HostPort: "8000" }]
-    // }
     ExposedPorts: { "8000/tcp": {} }
   };
 
@@ -153,12 +149,13 @@ const proxyServer = http.createServer((req, res) => {
     console.log("HOST :", host);
     console.log("===================================");
     if (req.method === "POST" && req.url === "/update") {
-      // load notebook from session state if stashed notebookId
+      // save notebook data from client to the db
       saveNotebook(req, res, sessions);
     } else if (!sessions[host]) {
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {
+      // load notebook from session state if stashed notebookId
       loadNotebook(req, res, sessions);
     } else {
       console.log("inside proxy!");

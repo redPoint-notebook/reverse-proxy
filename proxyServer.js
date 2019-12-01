@@ -67,13 +67,25 @@ const loadNotebook = (req, res) => {
 };
 
 const tearDown = (req, res) => {
-  console.log("From delete: ", sessions, req.headers);
-  const containerId = sessions[req.headers.host].containerId;
+  console.log("INSIDE TEARDOWN!!");
+  const session = sessions[req.headers.host];
+  const lastVisit = session.lastVisited;
+  const containerId = session.containerId;
+  setTimeout(() => {
+    if (lastVisit === session.lastVisited) {
+      console.log("===================================");
+      console.log("DELETING SESSION AND CONTAINER");
+      // console.log("containerId : ", containerId);
+      console.log("sessions : ", sessions);
+      docker.getContainer(containerId).remove({ force: true });
+      delete sessions[req.headers.host];
+      console.log("sessions : ", sessions);
+      console.log("===================================");
+      res.writeHead(202);
+      return res.end("DELETED");
+    }
+  }, 10000)
 
-  docker.getContainer(containerId).remove({ force: true });
-  delete sessions[req.headers.host];
-  res.writeHead(202);
-  return res.end("DELETED");
 }
 
 const startNewSession = (req, res) => {
@@ -115,7 +127,8 @@ const startNewSession = (req, res) => {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000
           containerId,
-          notebookId: (notebookId || null)
+          notebookId: (notebookId || null),
+          lastVisited: Date.now(),
         };
 
         console.log("Sessions object: " + JSON.stringify(sessions));
@@ -131,17 +144,14 @@ const proxyServer = http.createServer((req, res) => {
   // www.redpointnotebook.com
   // www.123abc.redpointnotebook.com
 
-
   if (host === ROOT) {
     console.log("===================================");
     console.log("Inside host === ROOT");
     console.log("Host : ", host);
+    console.log("req.method : ", req.method);
     console.log("===================================");
 
-    if (req.method === "DELETE") {
-      // server.js issues delete request to tear down a container session
-      tearDown(req, res);
-    } else if (req.method === "GET") {
+    if (req.method === "GET") {
       // console.log("Request headers host: " + req.headers.host);
       startNewSession(req, res);
     }
@@ -151,7 +161,11 @@ const proxyServer = http.createServer((req, res) => {
     console.log("Inside host !== ROOT")
     console.log("HOST :", host);
     console.log("===================================");
-    if (req.method === "POST" && (req.url === "/save" || req.url === "/clone")) {
+    if (req.method === "DELETE") {
+      console.log("Delete Request received");
+      // server.js issues delete request to tear down a container session
+      tearDown(req, res);
+    } else if (req.method === "POST" && (req.url === "/save" || req.url === "/clone")) {
       // save or clone notebook
       saveOrCloneNotebook(req, res, sessions);
     } else if (!sessions[host]) {
@@ -163,6 +177,7 @@ const proxyServer = http.createServer((req, res) => {
       loadNotebook(req, res, sessions);
     } else {
       console.log("inside proxy!");
+      sessions[host].lastVisited = Date.now();
       proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {
       });
     }
@@ -176,7 +191,6 @@ proxyServer.on("upgrade", (req, socket, head) => {
   console.log("===================================");
   proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
 });
-
 
 proxyServer.listen(80, () => {
   console.log("Listening on port 80...");

@@ -12,52 +12,16 @@ let containerId;
 let IPAddress;
 let sessions = {};
 
-const ROOT = "www.redpointnotebook.club";
-const ROOT2 = "redpointnotebook.club";
-const PORT = 8000;
+const ROOT = process.env.ROOT;
+const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
+const PORT = process.env.PORT;
+const IMAGE = process.env.IMAGE;
 
 const proxy = httpProxy.createProxyServer({
   // secure: true,
   ws: true,
   followRedirects: true
 });
-
-// const saveNotebook = (req, res, sessions) => {
-//   let body = "";
-//   req.on("data", chunk => {
-//     body += chunk;
-//   });
-//   req.on("end", () => {
-//     const notebookData = JSON.parse(body);
-//     sessions[req.headers.host].notebookId = notebookData.id;
-//     db("SAVE", notebookData, notebookData.id).then(data => {
-//       console.log(data);
-//       res.setHeader('Access-Control-Allow-Origin', '*');
-//       res.end("Save success!");
-//     }).catch(err => {
-//       res.setHeader('Access-Control-Allow-Origin', '*');
-//       res.end(null);
-//     })
-//   });
-// };
-
-// const cloneNotebook = (req, res, sessions) => {
-//   let body = "";
-//   req.on("data", chunk => {
-//     body += chunk;
-//   });
-//   req.on("end", () => {
-//     const notebookData = JSON.parse(body);
-//     db("SAVE", notebookData, notebookData.id).then(data => {
-//       console.log(data);
-//       res.setHeader('Access-Control-Allow-Origin', '*');
-//       res.end("Save success!");
-//     }).catch(err => {
-//       res.setHeader('Access-Control-Allow-Origin', '*');
-//       res.end(null);
-//     })
-//   });
-// };
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -113,10 +77,7 @@ const tearDown = (req, res) => {
 }
 
 const startNewSession = (req, res) => {
-  // console.log("req.headers.host => ", req.headers.host);
-
   const matchData = req.url.match(/\/notebooks\/(.*)/);
-
   let notebookId;
   if (matchData) {
     notebookId = matchData[1];
@@ -124,19 +85,18 @@ const startNewSession = (req, res) => {
 
   console.log("Notebook ID : ", notebookId);
 
-
   const html = fs.readFileSync(__dirname + "/redirect.html", {
     encoding: "utf-8"
   });
 
   const sessionId = uuidv4().slice(0, 6);
-  const sessionURL = `www.${sessionId}.${ROOT2}`;
+  const sessionURL = `www.${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
   const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
 
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "324d878fb42c",
+    Image: IMAGE,
     ExposedPorts: { "8000/tcp": {} }
   };
 

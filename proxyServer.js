@@ -12,9 +12,10 @@ let containerId;
 let IPAddress;
 let sessions = {};
 
-const ROOT = "www.redpointnotebook.com";
-const ROOT2 = "redpointnotebook.com";
-const PORT = 8000;
+const ROOT = process.env.ROOT;
+const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
+const PORT = process.env.PORT;
+const IMAGE = process.env.IMAGE;
 
 const proxy = httpProxy.createProxyServer({
   // secure: true,
@@ -22,15 +23,20 @@ const proxy = httpProxy.createProxyServer({
   followRedirects: true
 });
 
-const saveNotebook = (req, res, sessions) => {
-
+const saveOrCloneNotebook = (req, res, sessions) => {
+  const isSave = /save/.test(req.url);
   let body = "";
+
   req.on("data", chunk => {
     body += chunk;
   });
+
   req.on("end", () => {
     const notebookData = JSON.parse(body);
-    sessions[req.headers.host].notebookId = notebookData.id;
+    if (isSave) {
+      sessions[req.headers.host].notebookId = notebookData.id;
+    }
+
     db("SAVE", notebookData, notebookData.id).then(data => {
       console.log(data);
       res.setHeader('Access-Control-Allow-Origin', '*');
@@ -40,7 +46,7 @@ const saveNotebook = (req, res, sessions) => {
       res.end(null);
     })
   });
-};
+}
 
 const loadNotebook = (req, res) => {
   console.log("INSIDE LOAD NOTEBOOK");
@@ -83,10 +89,7 @@ const tearDown = (req, res) => {
 }
 
 const startNewSession = (req, res) => {
-  // console.log("req.headers.host => ", req.headers.host);
-
   const matchData = req.url.match(/\/notebooks\/(.*)/);
-
   let notebookId;
   if (matchData) {
     notebookId = matchData[1];
@@ -94,22 +97,18 @@ const startNewSession = (req, res) => {
 
   console.log("Notebook ID : ", notebookId);
 
-  let sessionId = uuidv4().slice(0, 6);
-
   const html = fs.readFileSync(__dirname + "/redirect.html", {
     encoding: "utf-8"
   });
 
-  const sessionURL = `www.${sessionId}.${ROOT2}`;
+  const sessionId = uuidv4().slice(0, 6);
+  const sessionURL = `www.${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
   const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
 
   res.end(interpolatedHtml);
 
   const options = {
-    Image: "csgdocker/teardown",
-    // PortBindings: {  
-    //   "8000/tcp": [{ HostPort: "8000" }]
-    // }
+    Image: IMAGE,
     ExposedPorts: { "8000/tcp": {} }
   };
 
@@ -161,18 +160,20 @@ const proxyServer = http.createServer((req, res) => {
     console.log("===================================");
     console.log("Inside host !== ROOT")
     console.log("HOST :", host);
-    console.log("=============  ======================");
+    console.log("===================================");
     if (req.method === "DELETE") {
       console.log("Delete Request received");
       // server.js issues delete request to tear down a container session
       tearDown(req, res);
-    } else if (req.method === "POST" && req.url === "/update") {
-      // load notebook from session state if stashed notebookId
-      saveNotebook(req, res, sessions);
+    } else if (req.method === "POST" && (req.url === "/save" || req.url === "/clone")) {
+      // save or clone notebook
+      saveOrCloneNotebook(req, res, sessions);
     } else if (!sessions[host]) {
+      // subdomain is not in the sessions object
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {
+      // load notebook from session state if stashed notebookId
       loadNotebook(req, res, sessions);
     } else {
       console.log("inside proxy!");

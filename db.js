@@ -18,7 +18,7 @@ const {
 
 const url = `mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@${MONGO_HOSTNAME}:${MONGO_PORT}/${MONGO_DB}?authSource=admin`;
 
-const db = (requestType, notebook, notebookId) => {
+const db = (requestType, notebook, notebookId, webhookData) => {
   return new Promise(resolve => {
     const before = Date.now();
 
@@ -38,6 +38,10 @@ const db = (requestType, notebook, notebookId) => {
           });
         } else if (requestType === "SAVE") {
           saveNotebook(collection, notebook).then(saveResponse => {
+            resolve(saveResponse);
+          });
+        } else if (requestType === "WEBHOOK") {
+          saveWebhookData(collection, notebookId, webhookData).then(saveResponse => {
             resolve(saveResponse);
           });
         }
@@ -88,3 +92,26 @@ const saveNotebook = (collection, notebook) => {
     resolve(saveStatus);
   });
 };
+
+
+const saveWebhookData = (collection, notebookId, webhookData) => {
+  return new Promise(resolve => {
+    const saveStatus = collection.updateOne(
+      { id: notebookId },
+      { $push: { webhookData: webhookData } },
+      // { upsert: true }, // assumes that notebook has been saved before registering a new webhook for that notebook id
+      (err, result) => {
+        if (err) {
+          console.log(err);
+          reject()
+        } else {
+          console.log("Webhook data added to database");
+          console.log(`Mongo result of insertOne: ${result}`);
+          return result;
+        }
+      }
+    );
+    resolve(saveStatus);
+  });
+};
+

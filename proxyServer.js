@@ -3,16 +3,8 @@ const httpProxy = require("http-proxy");
 const https = require("https");
 const http = require("http");
 const helpers = require('./helpers')
-// import {
-//   saveOrCloneNotebook,
-//   loadNotebook,
-//   tearDown,
-//   startNewSession
-// } from "./helpers";
 const ROOT = process.env.ROOT;
 
-let containerId;
-let IPAddress;
 let sessions = {};
 
 const proxy = httpProxy.createProxyServer({
@@ -34,7 +26,7 @@ const proxyServer = http.createServer((req, res) => {
     console.log("===================================");
 
     if (req.method === "GET") {
-      helpers.startNewSession(req, res);
+      helpers.startNewSession(req, res, sessions);
     }
   } else if (host !== ROOT) {
     // host === subdomained url
@@ -45,7 +37,7 @@ const proxyServer = http.createServer((req, res) => {
     if (req.method === "DELETE") {
       console.log("Delete Request received");
       // server.js issues delete request to tear down a container session
-      helpers.tearDown(req, res);
+      helpers.tearDown(req, res, sessions);
     } else if (req.method === "POST" && (req.url === "/save" || req.url === "/clone")) {
       // save or clone notebook
       helpers.saveOrCloneNotebook(req, res, sessions);

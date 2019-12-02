@@ -4,7 +4,6 @@ const fs = require("fs");
 const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
-
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
@@ -34,7 +33,7 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   });
 }
 
-const loadNotebook = (req, res) => {
+const loadNotebook = (req, res, sessions) => {
   console.log("INSIDE LOAD NOTEBOOK");
   console.log("req.url", req.url);
   console.log("req.headers.host", req.headers.host);
@@ -52,7 +51,7 @@ const loadNotebook = (req, res) => {
   }
 };
 
-const tearDown = (req, res) => {
+const tearDown = (req, res, sessions) => {
   console.log("INSIDE TEARDOWN!!");
   const session = sessions[req.headers.host];
   const lastVisit = session.lastVisited;
@@ -73,7 +72,7 @@ const tearDown = (req, res) => {
   }, 10000)
 }
 
-const startNewSession = (req, res) => {
+const startNewSession = (req, res, sessions) => {
   const matchData = req.url.match(/\/notebooks\/(.*)/);
   let notebookId;
   if (matchData) {
@@ -97,7 +96,7 @@ const startNewSession = (req, res) => {
   };
 
   docker.createContainer(options, (err, container) => {
-    containerId = container.id;
+    const containerId = container.id;
     console.log("Id of this container is " + containerId);
 
     container.start((err, data) => {

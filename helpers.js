@@ -9,7 +9,7 @@ const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
 
-export const saveOrCloneNotebook = (req, res, sessions) => {
+const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
   let body = "";
 
@@ -34,7 +34,7 @@ export const saveOrCloneNotebook = (req, res, sessions) => {
   });
 }
 
-export const loadNotebook = (req, res) => {
+const loadNotebook = (req, res) => {
   console.log("INSIDE LOAD NOTEBOOK");
   console.log("req.url", req.url);
   console.log("req.headers.host", req.headers.host);
@@ -52,7 +52,7 @@ export const loadNotebook = (req, res) => {
   }
 };
 
-export const tearDown = (req, res) => {
+const tearDown = (req, res) => {
   console.log("INSIDE TEARDOWN!!");
   const session = sessions[req.headers.host];
   const lastVisit = session.lastVisited;
@@ -73,7 +73,7 @@ export const tearDown = (req, res) => {
   }, 10000)
 }
 
-export const startNewSession = (req, res) => {
+const startNewSession = (req, res) => {
   const matchData = req.url.match(/\/notebooks\/(.*)/);
   let notebookId;
   if (matchData) {
@@ -119,5 +119,9 @@ export const startNewSession = (req, res) => {
       });
     });
   });
-
 }
+
+module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
+module.exports.loadNotebook = loadNotebook;
+module.exports.startNewSession = startNewSession;
+module.exports.tearDown = tearDown;

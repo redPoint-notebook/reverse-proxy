@@ -4,9 +4,23 @@ const fs = require("fs");
 const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+
+const ROOT = process.env.ROOT;
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const nodemailer = require('nodemailer');
+
+var transporter = nodemailer.createTransport({
+  service: EMAIL_SERVICE,
+  auth: {
+    user: EMAIL_USER,
+    password: EMAIL_PASSWORD
+  }
+});
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -158,9 +172,31 @@ const sendEmail = (req, res) => {
     console.log('Email address: ', emailData.emailAddress);
     console.log('Notebook operation: ', emailData.operation);
     // **TODO** send email here
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.writeHead(200);
-    res.end('Email received')
+
+
+    const mailOptions = {
+      from: EMAIL_USER, // sender address
+      to: emailData.emailAddress, // list of receivers
+      subject: 'Your Redpoint Notebook URL', // Subject line
+      html: `<p>Here's a link to your 
+              <a href="${emailData.notebookURL}">  ${emailData.operation}d notebook</a>
+              </p>`
+    };
+
+    transporter.sendMail(mailOptions, function (err, info) {
+      if (err) {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.writeHead(200);
+        res.end('Error sending email')
+      }
+      else {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.writeHead(200);
+        res.end('Email sent');
+      }
+    });
+
+
   })
 }
 

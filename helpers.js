@@ -120,7 +120,53 @@ const startNewSession = (req, res, sessions) => {
   });
 }
 
+const saveWebhook = (req, res) => {
+  const matchData = req.url.match(/\/webhooks\/(.*)/);
+  let notebookId;
+  let body = '';
+
+  if (matchData) {
+    notebookId = matchData[1];
+  }
+
+  console.log('Webhook notebook id is :', notebookId)
+
+  req.on("data", chunk => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    const webhookData = JSON.parse(body);
+    console.log(webhookData);
+
+    db("WEBHOOK", null, notebookId, webhookData);
+    res.writeHead(200);
+    res.end()
+  });
+}
+
+const sendEmail = (req, res) => {
+  console.log('Request to send email received')
+  let body = "";
+
+  req.on("data", chunk => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    const emailData = JSON.parse(body);
+    console.log('Email address: ', emailData.emailAddress);
+    console.log('Notebook operation: ', emailData.operation);
+    // **TODO** send email here
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.writeHead(200);
+    res.end('Email received')
+  })
+}
+
 module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
 module.exports.loadNotebook = loadNotebook;
 module.exports.startNewSession = startNewSession;
 module.exports.tearDown = tearDown;
+module.exports.saveWebhook = saveWebhook;
+module.exports.sendEmail = sendEmail;

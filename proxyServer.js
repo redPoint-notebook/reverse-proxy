@@ -6,7 +6,6 @@ const helpers = require('./helpers')
 const ROOT = process.env.ROOT;
 const db = require("./db");
 
-
 let sessions = {};
 
 const proxy = httpProxy.createProxyServer({
@@ -56,7 +55,6 @@ const proxyServer = http.createServer((req, res) => {
         res.writeHead(200);
         res.end()
       });
-
     }
   } else if (host !== ROOT) {
     // host === subdomained url

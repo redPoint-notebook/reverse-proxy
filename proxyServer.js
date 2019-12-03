@@ -1,21 +1,11 @@
 require("dotenv").config();
-const db = require("./db");
 const httpProxy = require("http-proxy");
-const fs = require("fs");
 const https = require("https");
 const http = require("http");
-const uuidv4 = require("uuid/v4");
-const Docker = require("dockerode");
-let docker = new Docker({ socketPath: "/var/run/docker.sock" });
-
-let containerId;
-let IPAddress;
-let sessions = {};
-
+const helpers = require('./helpers')
 const ROOT = process.env.ROOT;
-const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
-const PORT = process.env.PORT;
-const IMAGE = process.env.IMAGE;
+
+let sessions = {};
 
 const proxy = httpProxy.createProxyServer({
   // secure: true,
@@ -23,125 +13,9 @@ const proxy = httpProxy.createProxyServer({
   followRedirects: true
 });
 
-const saveOrCloneNotebook = (req, res, sessions) => {
-  const isSave = /save/.test(req.url);
-  let body = "";
-
-  req.on("data", chunk => {
-    body += chunk;
-  });
-
-  req.on("end", () => {
-    const notebookData = JSON.parse(body);
-    if (isSave) {
-      sessions[req.headers.host].notebookId = notebookData.id;
-    }
-
-    db("SAVE", notebookData, notebookData.id).then(data => {
-      console.log(data);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end("Save success!");
-    }).catch(err => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end(null);
-    })
-  });
-}
-
-const loadNotebook = (req, res) => {
-  console.log("INSIDE LOAD NOTEBOOK");
-  console.log("req.url", req.url);
-  console.log("req.headers.host", req.headers.host);
-  console.log("Sessions : ", sessions);
-  console.log("===================================");
-  const notebookId = sessions[req.headers.host].notebookId;
-  if (notebookId) {
-    db("LOAD", null, notebookId).then(data => {
-      console.log("Loaded notebook : ", data);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      return res.end(JSON.stringify(data));
-    });
-  } else {
-    res.end(JSON.stringify(null));
-  }
-};
-
-const tearDown = (req, res) => {
-  console.log("INSIDE TEARDOWN!!");
-  const session = sessions[req.headers.host];
-  const lastVisit = session.lastVisited;
-  const containerId = session.containerId;
-  setTimeout(() => {
-    if (lastVisit === session.lastVisited) {
-      console.log("===================================");
-      console.log("DELETING SESSION AND CONTAINER");
-      // console.log("containerId : ", containerId);
-      console.log("sessions : ", sessions);
-      docker.getContainer(containerId).remove({ force: true });
-      delete sessions[req.headers.host];
-      console.log("sessions : ", sessions);
-      console.log("===================================");
-      res.writeHead(202);
-      return res.end("DELETED");
-    }
-  }, 10000)
-
-}
-
-const startNewSession = (req, res) => {
-  const matchData = req.url.match(/\/notebooks\/(.*)/);
-  let notebookId;
-  if (matchData) {
-    notebookId = matchData[1];
-  }
-
-  console.log("Notebook ID : ", notebookId);
-
-  const html = fs.readFileSync(__dirname + "/redirect.html", {
-    encoding: "utf-8"
-  });
-
-  const sessionId = uuidv4().slice(0, 6);
-  const sessionURL = `www.${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
-  const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
-
-  res.end(interpolatedHtml);
-
-  const options = {
-    Image: IMAGE,
-    ExposedPorts: { "8000/tcp": {} }
-  };
-
-  docker.createContainer(options, (err, container) => {
-    containerId = container.id;
-    console.log("Id of this container is " + containerId);
-
-    container.start((err, data) => {
-      if (err) console.log(err);
-      container.inspect(container.id).then(data => {
-        const IPAddress = data.NetworkSettings.IPAddress;
-        console.log("IP address of this container is: " + IPAddress);
-
-        const containerURL = `http://${IPAddress}:${PORT}`;
-        sessions[sessionURL] = {
-          // www.asd443.redpoint.com
-          ip: containerURL, // http://172.11.78:8000
-          containerId,
-          notebookId: (notebookId || null),
-          lastVisited: Date.now(),
-        };
-
-        console.log("Sessions object: " + JSON.stringify(sessions));
-      });
-    });
-  });
-
-}
 const proxyServer = http.createServer((req, res) => {
-  // console.log("Request headers host: " + req.headers.host);
-
   const host = req.headers.host;
-  // www.redpointnotebook.com
+  // www.redpointnotebook.com or
   // www.123abc.redpointnotebook.com
 
   if (host === ROOT) {
@@ -152,8 +26,7 @@ const proxyServer = http.createServer((req, res) => {
     console.log("===================================");
 
     if (req.method === "GET") {
-      // console.log("Request headers host: " + req.headers.host);
-      startNewSession(req, res);
+      helpers.startNewSession(req, res, sessions);
     }
   } else if (host !== ROOT) {
     // host === subdomained url
@@ -164,17 +37,17 @@ const proxyServer = http.createServer((req, res) => {
     if (req.method === "DELETE") {
       console.log("Delete Request received");
       // server.js issues delete request to tear down a container session
-      tearDown(req, res);
+      helpers.tearDown(req, res, sessions);
     } else if (req.method === "POST" && (req.url === "/save" || req.url === "/clone")) {
       // save or clone notebook
-      saveOrCloneNotebook(req, res, sessions);
+      helpers.saveOrCloneNotebook(req, res, sessions);
     } else if (!sessions[host]) {
       // subdomain is not in the sessions object
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {
       // load notebook from session state if stashed notebookId
-      loadNotebook(req, res, sessions);
+      helpers.loadNotebook(req, res, sessions);
     } else {
       console.log("inside proxy!");
       sessions[host].lastVisited = Date.now();

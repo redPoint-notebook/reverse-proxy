@@ -4,9 +4,22 @@ const fs = require("fs");
 const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+const nodemailer = require('nodemailer');
+
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
+const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
+const EMAIL_USER = process.env.EMAIL_USER;
+const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+
+const transporter = nodemailer.createTransport({
+  service: EMAIL_SERVICE,
+  auth: {
+    user: EMAIL_USER,
+    pass: EMAIL_PASSWORD
+  }
+});
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -134,9 +147,78 @@ const teardownZombieContainers = (sessions) => {
     });
   }, 15000)
 }
+const saveWebhook = (req, res) => {
+  const matchData = req.url.match(/\/webhooks\/(.*)/);
+  let notebookId;
+  let body = '';
+
+  if (matchData) {
+    notebookId = matchData[1];
+  }
+
+  console.log('Webhook notebook id is :', notebookId)
+
+  req.on("data", chunk => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    const webhookData = JSON.parse(body);
+    console.log(webhookData);
+
+    db("WEBHOOK", null, notebookId, webhookData);
+    res.writeHead(200);
+    res.end()
+  });
+}
+
+const sendEmail = (req, res) => {
+  console.log('Request to send email received')
+  let body = "";
+
+  req.on("data", chunk => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    const emailData = JSON.parse(body);
+
+    const notebookURL = emailData.notebookURL;
+
+    let emailHtml = fs.readFileSync(__dirname + "/email.html", {
+      encoding: "utf-8"
+    });
+
+    emailHtml = emailHtml.replace("${}", emailData.operation);
+    emailHtml = emailHtml.replace("$${}", emailData.notebookURL);
+
+    const mailOptions = {
+      from: EMAIL_USER, // sender address
+      to: emailData.emailAddress, // list of receivers
+      subject: 'Your Redpoint Notebook URL', // Subject line
+      html: emailHtml
+    };
+
+    transporter.sendMail(mailOptions, function (err, info) {
+      if (err) {
+        console.log('Error sending email: ', err);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.writeHead(200);
+        res.end('Error sending email')
+      }
+      else {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.writeHead(200);
+        res.end('Email sent');
+      }
+    });
+  })
+}
 
 module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
 module.exports.loadNotebook = loadNotebook;
 module.exports.startNewSession = startNewSession;
 module.exports.tearDown = tearDown;
 module.exports.teardownZombieContainers = teardownZombieContainers;
+module.exports.saveWebhook = saveWebhook;
+module.exports.sendEmail = sendEmail;

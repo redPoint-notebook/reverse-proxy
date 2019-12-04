@@ -4,7 +4,6 @@ const https = require("https");
 const http = require("http");
 const helpers = require('./helpers')
 const ROOT = process.env.ROOT;
-const db = require("./db");
 
 let sessions = {};
 
@@ -52,33 +51,12 @@ const proxyServer = http.createServer((req, res) => {
 
     if (req.method === "GET") {
       helpers.startNewSession(req, res, sessions);
-    }
-
-    if (req.method === "POST" && req.url.match(/\/webhooks\/(.*)/)) {
-
-      const matchData = req.url.match(/\/webhooks\/(.*)/);
-      let notebookId;
-
-      if (matchData) {
-        notebookId = matchData[1];
+    } else if (req.method === "POST") {
+      if (req.url.match(/\/webhooks\/(.*)/)) {
+        helpers.saveWebhook(req, res);
+      } else if (req.url === '/email') {
+        helpers.sendEmail(req, res);
       }
-
-      console.log('Webhook notebook id is :', notebookId)
-
-      let body = '';
-
-      req.on("data", chunk => {
-        body += chunk;
-      });
-
-      req.on("end", () => {
-        const webhookData = JSON.parse(body);
-        console.log(webhookData);
-
-        db("WEBHOOK", null, notebookId, webhookData);
-        res.writeHead(200);
-        res.end()
-      });
     }
   } else if (host !== ROOT) {
     // host === subdomained url

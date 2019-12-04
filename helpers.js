@@ -120,7 +120,23 @@ const startNewSession = (req, res, sessions) => {
   });
 }
 
+const teardownZombieContainers = (sessions) => {
+  setInterval(() => {
+    docker.listContainers((err, containers) => {
+      const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
+        return sessions[sessionUrl].containerId;
+      });
+      containers.forEach((containerInfo) => {
+        if (!sessionContainerIds.includes(containerInfo.Id)) {
+          docker.getContainer(containerInfo.Id).remove({ force: true });
+        }
+      });
+    });
+  }, 15000)
+}
+
 module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
 module.exports.loadNotebook = loadNotebook;
 module.exports.startNewSession = startNewSession;
 module.exports.tearDown = tearDown;
+module.exports.teardownZombieContainers = teardownZombieContainers;

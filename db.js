@@ -29,7 +29,7 @@ const db = (requestType, notebook, notebookId, webhookData) => {
           console.error(err);
           return;
         }
-        const database = client.db("redpoint");
+        const database = client.db(MONGO_DB);
         const collection = database.collection("notebooks");
 
         if (requestType === "LOAD") {

@@ -168,16 +168,21 @@ const sendEmail = (req, res) => {
 
   req.on("end", () => {
     const emailData = JSON.parse(body);
-    console.log('Email address: ', emailData.emailAddress);
-    console.log('Notebook operation: ', emailData.operation);
+
+    const notebookURL = emailData.notebookURL;
+
+    let emailHtml = fs.readFileSync(__dirname + "/email.html", {
+      encoding: "utf-8"
+    });
+
+    emailHtml = emailHtml.replace("${}", emailData.operation);
+    emailHtml = emailHtml.replace("$${}", emailData.notebookURL);
 
     const mailOptions = {
       from: EMAIL_USER, // sender address
       to: emailData.emailAddress, // list of receivers
       subject: 'Your Redpoint Notebook URL', // Subject line
-      html: `<p>Here's a link to your 
-              <a href="${emailData.notebookURL}">  ${emailData.operation}d notebook</a>
-              </p>`
+      html: emailHtml
     };
 
     transporter.sendMail(mailOptions, function (err, info) {

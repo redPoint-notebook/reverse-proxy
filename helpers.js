@@ -4,21 +4,20 @@ const fs = require("fs");
 const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
+const nodemailer = require('nodemailer');
 
-const ROOT = process.env.ROOT;
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
 const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
-const nodemailer = require('nodemailer');
 
-var transporter = nodemailer.createTransport({
+const transporter = nodemailer.createTransport({
   service: EMAIL_SERVICE,
   auth: {
     user: EMAIL_USER,
-    password: EMAIL_PASSWORD
+    pass: EMAIL_PASSWORD
   }
 });
 
@@ -171,8 +170,6 @@ const sendEmail = (req, res) => {
     const emailData = JSON.parse(body);
     console.log('Email address: ', emailData.emailAddress);
     console.log('Notebook operation: ', emailData.operation);
-    // **TODO** send email here
-
 
     const mailOptions = {
       from: EMAIL_USER, // sender address
@@ -185,6 +182,7 @@ const sendEmail = (req, res) => {
 
     transporter.sendMail(mailOptions, function (err, info) {
       if (err) {
+        console.log('Error sending email: ', err);
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.writeHead(200);
         res.end('Error sending email')

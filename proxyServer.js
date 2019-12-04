@@ -14,6 +14,30 @@ const proxy = httpProxy.createProxyServer({
   followRedirects: true
 });
 
+// ~~~~~~~~~~~~~~~
+
+// const fs = require('fs');
+// const https_options = {
+//   key: fs.readFileSync('/etc/letsencrypt/live/willmills.dev/privkey.pem'),
+//   cert: fs.readFileSync('/etc/letsencrypt/live/willmills.dev/fullchain.pem')
+// }
+// const httpsServer = https.createServer(https_options, (req, res) => {
+//   const host = req.headers.host;
+//   console.log('~~~~~ Inside HTTPS Server ~~~~');
+//   console.log("Host: ", host);
+
+//   res.writeHead(200);
+//   res.end("We're up in HTTPS land!")
+
+// })
+
+// httpsServer.listen(443, () => {
+//   console.log("Listening for secure connections on port 443...")
+// })
+
+
+// ~~~~~~~~~~~~~~~
+
 const proxyServer = http.createServer((req, res) => {
   const host = req.headers.host;
   // www.redpointnotebook.com or
@@ -71,6 +95,7 @@ const proxyServer = http.createServer((req, res) => {
       helpers.saveOrCloneNotebook(req, res, sessions);
     } else if (!sessions[host]) {
       // subdomain is not in the sessions object
+      console.log("Could not find session")
       res.writeHead(404);
       return res.end();
     } else if (req.url === '/loadNotebook' && req.method === 'GET') {
@@ -85,6 +110,8 @@ const proxyServer = http.createServer((req, res) => {
   }
 });
 
+helpers.teardownZombieContainers(sessions);
+
 proxyServer.on("upgrade", (req, socket, head) => {
   console.log("===================================");
   console.log("Inside on('upgrade')")
@@ -96,5 +123,3 @@ proxyServer.on("upgrade", (req, socket, head) => {
 proxyServer.listen(80, () => {
   console.log("Listening on port 80...");
 });
-
-

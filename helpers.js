@@ -100,8 +100,8 @@ const startNewSession = (req, res, sessions) => {
     encoding: "utf-8"
   });
   const sessionId = uuidv4().slice(0, 6);
-  const sessionURL = `www.${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
-  const interpolatedHtml = html.replace("${}", `http://${sessionURL}`);
+  const sessionURL = `${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
+  const interpolatedHtml = html.replace("${}", `https://${sessionURL}`);
 
   res.end(interpolatedHtml);
 
@@ -120,7 +120,7 @@ const startNewSession = (req, res, sessions) => {
         const IPAddress = data.NetworkSettings.IPAddress;
         console.log("IP address of this container is: " + IPAddress);
 
-        const containerURL = `http://${IPAddress}:${PORT}`;
+        const containerURL = `https://${IPAddress}:${PORT}`;
         sessions[sessionURL] = {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000

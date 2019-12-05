@@ -10,6 +10,8 @@ const fs = require("fs");
 
 let sessions = {};
 
+const proxyToHTTPSServer = httpProxy.createProxyServer();
+
 const proxy = httpProxy.createProxyServer({
   // secure: true,
   ws: true,
@@ -20,8 +22,9 @@ const proxy = httpProxy.createProxyServer({
 // Redirect all traffic from http to https
 const httpServer = http.createServer((req, res) => {
   helpers.log("Redirecting to HTTPS");
-  res.writehead(301, { Location: `https://${req.headers.host}${req.url}` });
-  res.end();
+  proxyToHTTPSServer.web(req, res, {
+    target: `https://${req.headers.host}${req.url}`
+  });
 });
 
 httpServer.listen(80, () => {

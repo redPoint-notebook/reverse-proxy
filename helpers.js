@@ -4,7 +4,7 @@ const fs = require("fs");
 const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
-const nodemailer = require('nodemailer');
+const nodemailer = require("nodemailer");
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -35,16 +35,18 @@ const saveOrCloneNotebook = (req, res, sessions) => {
       sessions[req.headers.host].notebookId = notebookData.id;
     }
 
-    db("SAVE", notebookData, notebookData.id).then(data => {
-      console.log(data);
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end("Save success!");
-    }).catch(err => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.end(null);
-    })
+    db("SAVE", notebookData, notebookData.id)
+      .then(data => {
+        console.log(data);
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.end("Save success!");
+      })
+      .catch(err => {
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.end(null);
+      });
   });
-}
+};
 
 const loadNotebook = (req, res, sessions) => {
   console.log("INSIDE LOAD NOTEBOOK");
@@ -56,7 +58,7 @@ const loadNotebook = (req, res, sessions) => {
   if (notebookId) {
     db("LOAD", null, notebookId).then(data => {
       console.log("Loaded notebook : ", data);
-      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader("Access-Control-Allow-Origin", "*");
       return res.end(JSON.stringify(data));
     });
   } else {
@@ -82,8 +84,8 @@ const tearDown = (req, res, sessions) => {
       res.writeHead(202);
       return res.end("DELETED");
     }
-  }, 10000)
-}
+  }, 10000);
+};
 
 const startNewSession = (req, res, sessions) => {
   const matchData = req.url.match(/\/notebooks\/(.*)/);
@@ -123,40 +125,40 @@ const startNewSession = (req, res, sessions) => {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000
           containerId,
-          notebookId: (notebookId || null),
-          lastVisited: Date.now(),
+          notebookId: notebookId || null,
+          lastVisited: Date.now()
         };
 
         console.log("Sessions object: " + JSON.stringify(sessions));
       });
     });
   });
-}
+};
 
-const teardownZombieContainers = (sessions) => {
+const teardownZombieContainers = sessions => {
   setInterval(() => {
     docker.listContainers((err, containers) => {
       const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
         return sessions[sessionUrl].containerId;
       });
-      containers.forEach((containerInfo) => {
+      containers.forEach(containerInfo => {
         if (!sessionContainerIds.includes(containerInfo.Id)) {
           docker.getContainer(containerInfo.Id).remove({ force: true });
         }
       });
     });
-  }, 15000)
-}
+  }, 15000);
+};
 const saveWebhook = (req, res) => {
   const matchData = req.url.match(/\/webhooks\/(.*)/);
   let notebookId;
-  let body = '';
+  let body = "";
 
   if (matchData) {
     notebookId = matchData[1];
   }
 
-  console.log('Webhook notebook id is :', notebookId)
+  console.log("Webhook notebook id is :", notebookId);
 
   req.on("data", chunk => {
     body += chunk;
@@ -168,12 +170,12 @@ const saveWebhook = (req, res) => {
 
     db("WEBHOOK", null, notebookId, webhookData);
     res.writeHead(200);
-    res.end()
+    res.end();
   });
-}
+};
 
 const sendEmail = (req, res) => {
-  console.log('Request to send email received')
+  console.log("Request to send email received");
   let body = "";
 
   req.on("data", chunk => {
@@ -195,25 +197,24 @@ const sendEmail = (req, res) => {
     const mailOptions = {
       from: EMAIL_USER, // sender address
       to: emailData.emailAddress, // list of receivers
-      subject: 'Your Redpoint Notebook URL', // Subject line
+      subject: "Your Redpoint Notebook URL", // Subject line
       html: emailHtml
     };
 
-    transporter.sendMail(mailOptions, function (err, info) {
+    transporter.sendMail(mailOptions, function(err, info) {
       if (err) {
-        console.log('Error sending email: ', err);
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        console.log("Error sending email: ", err);
+        res.setHeader("Access-Control-Allow-Origin", "*");
         res.writeHead(200);
-        res.end('Error sending email')
-      }
-      else {
-        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.end("Error sending email");
+      } else {
+        res.setHeader("Access-Control-Allow-Origin", "*");
         res.writeHead(200);
-        res.end('Email sent');
+        res.end("Email sent");
       }
     });
-  })
-}
+  });
+};
 
 module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
 module.exports.loadNotebook = loadNotebook;
@@ -222,3 +223,4 @@ module.exports.tearDown = tearDown;
 module.exports.teardownZombieContainers = teardownZombieContainers;
 module.exports.saveWebhook = saveWebhook;
 module.exports.sendEmail = sendEmail;
+module.exports.log = log;

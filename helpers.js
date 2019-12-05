@@ -174,6 +174,14 @@ const saveWebhook = (req, res) => {
   });
 };
 
+const log = (...messages) => {
+  let date = new Date();
+  messages = Array.from(messages);
+  console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
+  console.log(String(date));
+  messages.forEach(mesg => console.log(mesg));
+};
+
 const sendEmail = (req, res) => {
   console.log("Request to send email received");
   let body = "";

@@ -57,7 +57,7 @@ const loadNotebook = (req, res, sessions) => {
   const notebookId = sessions[req.headers.host].notebookId;
   if (notebookId) {
     db("LOAD", null, notebookId).then(data => {
-      console.log("Loaded notebook : ", data);
+      log(`Loaded notebook : ${data}`);
       res.setHeader("Access-Control-Allow-Origin", "*");
       return res.end(JSON.stringify(data));
     });
@@ -67,20 +67,15 @@ const loadNotebook = (req, res, sessions) => {
 };
 
 const tearDown = (req, res, sessions) => {
-  console.log("INSIDE TEARDOWN!!");
+  console.log("INSIDE TEARDOWN");
   const session = sessions[req.headers.host];
   const lastVisit = session.lastVisited;
   const containerId = session.containerId;
   setTimeout(() => {
     if (lastVisit === session.lastVisited) {
-      console.log("===================================");
-      console.log("DELETING SESSION AND CONTAINER");
-      // console.log("containerId : ", containerId);
-      console.log("sessions : ", sessions);
+      log("DELETING SESSION AND CONTAINER", `sessions: ${sessions}`);
       docker.getContainer(containerId).remove({ force: true });
       delete sessions[req.headers.host];
-      console.log("sessions : ", sessions);
-      console.log("===================================");
       res.writeHead(202);
       return res.end("DELETED");
     }
@@ -101,7 +96,7 @@ const startNewSession = (req, res, sessions) => {
   });
   const sessionId = uuidv4().slice(0, 6);
   const sessionURL = `${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
-  const interpolatedHtml = html.replace("${}", `https://${sessionURL}`);
+  const interpolatedHtml = html.replace("${}", `${sessionURL}`);
 
   res.end(interpolatedHtml);
 
@@ -120,7 +115,7 @@ const startNewSession = (req, res, sessions) => {
         const IPAddress = data.NetworkSettings.IPAddress;
         console.log("IP address of this container is: " + IPAddress);
 
-        const containerURL = `https://${IPAddress}:${PORT}`;
+        const containerURL = `http://${IPAddress}:${PORT}`;
         sessions[sessionURL] = {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000

@@ -13,7 +13,7 @@ let sessions = {};
 const proxyToHTTPSServer = httpProxy.createProxyServer();
 
 const proxy = httpProxy.createProxyServer({
-  // secure: true,
+  secure: true,
   ws: true,
   followRedirects: true
 });
@@ -31,9 +31,6 @@ httpServer.listen(80, () => {
   helpers.log("HTTP Redirect server listening on port 80...");
 });
 // ~~~~~~~~~~~~~~~
-
-// SSLKEY = /etc/letsencrypt/live/redpointnotebooks.com/privkey.pem
-// SSLCERT = /etc/letsencrypt/live/redpointnotebooks.com/fullchain.pem
 
 const https_options = {
   key: fs.readFileSync(SSLKEY),

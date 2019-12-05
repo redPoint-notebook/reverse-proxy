@@ -45,9 +45,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
   if (host === ROOT) {
     helpers.log(
       "Inside host === ROOT",
-      "Host : ",
-      host,
-      "req.method : ",
+      `Host: ${host}`,
+      `req.method: ${req.method}`,
       req.method
     );
 
@@ -62,7 +61,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
     }
   } else if (host !== ROOT) {
     // host === subdomained url
-    helpers.log("Inside host !== ROOT", "HOST :", host);
+    helpers.log("Inside host !== ROOT", `HOST: ${host}`);
 
     if (req.method === "DELETE") {
       console.log("Delete Request received");
@@ -99,7 +98,7 @@ proxyServer.on("upgrade", (req, socket, head) => {
       sessions[req.headers.host].ip;
   }
 
-  helpers.log("Inside on('upgrade')", containerIP);
+  helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
 
   proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
 });

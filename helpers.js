@@ -104,7 +104,7 @@ const startNewSession = (req, res, sessions) => {
     Image: IMAGE,
     ExposedPorts: { "8000/tcp": {} },
     HostConfig: {
-      // Runtime: "runsc",
+      Runtime: "runsc",
       Memory: 50000000,
       CpuPeriod: 100000
       // CpuQuota: 20000

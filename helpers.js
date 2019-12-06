@@ -106,8 +106,8 @@ const startNewSession = (req, res, sessions) => {
     HostConfig: {
       Runtime: "runsc",
       Memory: 50000000,
-      CpuPeriod: 100000,
-      CpuQuota: 20000
+      CpuPeriod: 100000
+      // CpuQuota: 20000
     }
   };
 

@@ -102,7 +102,13 @@ const startNewSession = (req, res, sessions) => {
 
   const options = {
     Image: IMAGE,
-    ExposedPorts: { "8000/tcp": {} }
+    ExposedPorts: { "8000/tcp": {} },
+    HostConfig: {
+      Runtime: "runsc",
+      Memory: 50000000,
+      CpuPeriod: 100000,
+      CpuQuota: 20000
+    }
   };
 
   docker.createContainer(options, (err, container) => {

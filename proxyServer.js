@@ -92,15 +92,17 @@ const proxyServer = https.createServer(https_options, (req, res) => {
 helpers.teardownZombieContainers(sessions);
 
 proxyServer.on("upgrade", (req, socket, head) => {
-  let containerIP;
-  if (sessions[req.headers.host].ip) {
-    (containerIP = "sessions[req.headers.host].ip : "),
-      sessions[req.headers.host].ip;
+  if (sessions[req.headers.host]) {
+    let containerIP;
+    if (sessions[req.headers.host].ip) {
+      (containerIP = "sessions[req.headers.host].ip : "),
+        sessions[req.headers.host].ip;
+    }
+
+    helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
+
+    proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
   }
-
-  helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
-
-  proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
 });
 
 proxyServer.listen(443, () => {

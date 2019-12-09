@@ -5,6 +5,7 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const nodemailer = require("nodemailer");
+const fetch = require("node-fetch");
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;

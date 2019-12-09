@@ -3,7 +3,6 @@ const httpProxy = require("http-proxy");
 const https = require("https");
 const http = require("http");
 const helpers = require("./helpers");
-const fetch = require("node-fetch");
 const ROOT = process.env.ROOT;
 const SSLKEY = process.env.SSLKEY;
 const SSLCERT = process.env.SSLCERT;

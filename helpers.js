@@ -161,23 +161,28 @@ const startNewSession = (req, res, sessions) => {
 // };
 
 const teardownZombieContainers = sessions => {
-  setInterval(() => {
-    const sessionURLs = Object.keys(sessions);
-    sessionURLs.forEach(sessionURL => {
-      fetch(sessions[sessionURL].ip + "/checkHealth")
-        .then(res => res.text())
-        .then(body => {
-          if (body === "0") {
-            // teardown
-            delete sessions[sessionURL];
-            docker
-              .getContainer(sessions[sessionURL].containerId)
-              .remove({ force: true });
-          } else {
-            // keep alive. do nothing
-          }
-        });
-    });
+  setTimeout(() => {
+    setInterval(() => {
+      const sessionURLs = Object.keys(sessions);
+      sessionURLs.forEach(sessionURL => {
+        fetch(sessions[sessionURL].ip + "/checkHealth")
+          .then(res => res.text())
+          .then(body => {
+            if (body === "0") {
+              // teardown
+              delete sessions[sessionURL];
+              docker
+                .getContainer(sessions[sessionURL].containerId)
+                .remove({ force: true });
+            } else {
+              // keep alive. do nothing
+            }
+          })
+          .catch(err => {
+            console.log("Error : ", err);
+          });
+      });
+    }, 10000);
   }, 10000);
 };
 

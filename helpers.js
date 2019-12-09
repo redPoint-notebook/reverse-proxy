@@ -132,6 +132,22 @@ const startNewSession = (req, res, sessions) => {
         };
 
         console.log("Sessions object: " + JSON.stringify(sessions));
+        setTimeout(() => {
+          fetch(containerURL + "/checkHealth")
+            .then(res => res.json())
+            .then(({ webSocketEstablished }) => {
+              if (!webSocketEstablished) {
+                // teardown
+                delete sessions[sessionURL];
+                docker.getContainer(containerId).remove({ force: true });
+              } else {
+                // keep alive. do nothing
+              }
+            })
+            .catch(err => {
+              console.log("Error : ", err);
+            });
+        }, 30000);
       });
     });
   });

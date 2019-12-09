@@ -5,6 +5,7 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const nodemailer = require("nodemailer");
+const fetch = require("node-fetch");
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -131,25 +132,34 @@ const startNewSession = (req, res, sessions) => {
         };
 
         console.log("Sessions object: " + JSON.stringify(sessions));
+        setTimeout(() => {
+          fetch(containerURL + "/checkHealth")
+            .then(res => res.json())
+            .then(({ webSocketEstablished }) => {
+              if (!webSocketEstablished) {
+                delete sessions[sessionURL];
+                docker.getContainer(containerId).remove({ force: true });
+              } else {
+                // keep alive. do nothing
+              }
+            })
+            .catch(err => {
+              console.log("Error : ", err);
+            });
+        }, 30000);
       });
     });
   });
 };
 
-const teardownZombieContainers = sessions => {
-  setInterval(() => {
-    docker.listContainers((err, containers) => {
-      const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
-        return sessions[sessionUrl].containerId;
-      });
-      containers.forEach(containerInfo => {
-        if (!sessionContainerIds.includes(containerInfo.Id)) {
-          docker.getContainer(containerInfo.Id).remove({ force: true });
-        }
-      });
+const teardownZombieContainers = () => {
+  docker.listContainers((err, containers) => {
+    containers.forEach(containerInfo => {
+      docker.getContainer(containerInfo.Id).remove({ force: true });
     });
-  }, 15000);
+  });
 };
+
 const saveWebhook = (req, res) => {
   const matchData = req.url.match(/\/webhooks\/(.*)/);
   let notebookId;

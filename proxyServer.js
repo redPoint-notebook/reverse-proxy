@@ -84,7 +84,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
     } else {
       console.log("Proxying request through websocket");
       sessions[host].lastVisited = Date.now();
-      proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {});
+      proxy.web(req, res, { target: sessions[req.headers.host].ip });
     }
   }
 });
@@ -103,6 +103,22 @@ proxyServer.on("upgrade", (req, socket, head) => {
 
     proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
   }
+});
+
+proxy.on('error', function (err, req, res) {
+  res.writeHead(500, {
+    'Content-Type': 'text/plain'
+  });
+
+  res.end('There was an error proxying this request: ' + err);
+});
+
+proxyToHTTPSServer.on('error', function (err, req, res) {
+  res.writeHead(500, {
+    'Content-Type': 'text/plain'
+  });
+
+  res.end('There was an error proxying HTTP to HTTPS: ' + err);
 });
 
 proxyServer.listen(443, () => {

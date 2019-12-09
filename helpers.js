@@ -136,20 +136,50 @@ const startNewSession = (req, res, sessions) => {
   });
 };
 
+// const teardownZombieContainers = sessions => {
+//   setInterval(() => {
+//     docker.listContainers((err, containers) => {
+//       const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
+//         return sessions[sessionUrl].containerId;
+//       });
+//       containers.forEach(containerInfo => {
+//         if (!sessionContainerIds.includes(containerInfo.Id)) {
+//           docker.getContainer(containerInfo.Id).remove({ force: true });
+//         }
+//       });
+//     });
+//   }, 15000);
+// };
+
+// sessions[sessionURL] = {
+//   // www.asd443.redpoint.com
+//   ip: containerURL, // http://172.11.78:8000
+//   containerId,
+//   notebookId: notebookId || null,
+//   lastVisited: Date.now()
+// };
+
 const teardownZombieContainers = sessions => {
   setInterval(() => {
-    docker.listContainers((err, containers) => {
-      const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
-        return sessions[sessionUrl].containerId;
-      });
-      containers.forEach(containerInfo => {
-        if (!sessionContainerIds.includes(containerInfo.Id)) {
-          docker.getContainer(containerInfo.Id).remove({ force: true });
-        }
-      });
+    const sessionURLs = Object.keys(sessions);
+    sessionURLs.forEach(sessionURL => {
+      fetch(sessions[sessionURL].ip + "/checkHealth")
+        .then(res => res.text())
+        .then(body => {
+          if (body === "0") {
+            // teardown
+            delete sessions[sessionURL];
+            docker
+              .getContainer(sessions[sessionURL].containerId)
+              .remove({ force: true });
+          } else {
+            // keep alive. do nothing
+          }
+        });
     });
-  }, 15000);
+  }, 10000);
 };
+
 const saveWebhook = (req, res) => {
   const matchData = req.url.match(/\/webhooks\/(.*)/);
   let notebookId;

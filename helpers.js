@@ -137,7 +137,6 @@ const startNewSession = (req, res, sessions) => {
             .then(res => res.json())
             .then(({ webSocketEstablished }) => {
               if (!webSocketEstablished) {
-                // teardown
                 delete sessions[sessionURL];
                 docker.getContainer(containerId).remove({ force: true });
               } else {
@@ -153,53 +152,12 @@ const startNewSession = (req, res, sessions) => {
   });
 };
 
-// const teardownZombieContainers = sessions => {
-//   setInterval(() => {
-//     docker.listContainers((err, containers) => {
-//       const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
-//         return sessions[sessionUrl].containerId;
-//       });
-//       containers.forEach(containerInfo => {
-//         if (!sessionContainerIds.includes(containerInfo.Id)) {
-//           docker.getContainer(containerInfo.Id).remove({ force: true });
-//         }
-//       });
-//     });
-//   }, 15000);
-// };
-
-// sessions[sessionURL] = {
-//   // www.asd443.redpoint.com
-//   ip: containerURL, // http://172.11.78:8000
-//   containerId,
-//   notebookId: notebookId || null,
-//   lastVisited: Date.now()
-// };
-
-const teardownZombieContainers = sessions => {
-  setTimeout(() => {
-    setInterval(() => {
-      const sessionURLs = Object.keys(sessions);
-      sessionURLs.forEach(sessionURL => {
-        fetch(sessions[sessionURL].ip + "/checkHealth")
-          .then(res => res.text())
-          .then(body => {
-            if (body === "0") {
-              // teardown
-              delete sessions[sessionURL];
-              docker
-                .getContainer(sessions[sessionURL].containerId)
-                .remove({ force: true });
-            } else {
-              // keep alive. do nothing
-            }
-          })
-          .catch(err => {
-            console.log("Error : ", err);
-          });
-      });
-    }, 10000);
-  }, 10000);
+const teardownZombieContainers = () => {
+  docker.listContainers((err, containers) => {
+    containers.forEach(containerInfo => {
+      docker.getContainer(containerInfo.Id).remove({ force: true });
+    });
+  });
 };
 
 const saveWebhook = (req, res) => {

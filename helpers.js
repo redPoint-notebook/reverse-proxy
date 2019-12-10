@@ -176,9 +176,9 @@ const enqueueWebhookData = (req, res) => {
       JSON.stringify({ [notebookId]: webhookData })
     ); // { [notebookId]: body } ?
 
-    // https://redis.io/commands/blpop
-    // client.blpop()
-    console.log(webhookData);
+    console.log(redisClient.lrange("webhookqueue", 0, -1));
+
+    // console.log(webhookData);
   });
 };
 
@@ -189,8 +189,8 @@ const processWebhookData = () => {
       let notebookId = msg[0];
       let webhookData = msg[1];
 
-      // console.log("List Name : ", msg[0]);
-      // console.log("Data : ", msg[1]);
+      console.log("webhookqueue msg : ", msg);
+
       db("WEBHOOK", null, notebookId, webhookData);
       if (!msg) {
         clearInterval(intId);

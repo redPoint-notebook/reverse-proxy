@@ -176,8 +176,6 @@ const enqueueWebhookData = (req, res) => {
       JSON.stringify({ [notebookId]: webhookData })
     ); // { [notebookId]: body } ?
 
-    console.log(redisClient.lrange("webhookqueue", 0, -1));
-
     // console.log(webhookData);
   });
 };
@@ -186,8 +184,9 @@ const processWebhookData = () => {
   const intId = setInterval(() => {
     // if anything in queue, process it using BLPOP - blocking list left pop
     redisClient.blpop("webhookqueue", 0, (err, msg) => {
-      let notebookId = msg[0];
-      let webhookData = msg[1];
+      let data = JSON.parse(msg[1]);
+      let notebookId = Object.keys(data)[0];
+      let webhookData = data[notebookId];
 
       console.log("webhookqueue msg : ", msg);
 

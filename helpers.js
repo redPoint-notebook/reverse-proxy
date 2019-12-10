@@ -192,8 +192,6 @@ const processWebhookData = () => {
       // console.log("List Name : ", msg[0]);
       // console.log("Data : ", msg[1]);
       db("WEBHOOK", null, notebookId, webhookData);
-      res.writeHead(200);
-      res.end();
       if (!msg) {
         clearInterval(intId);
         redisClient.quit();
@@ -217,19 +215,19 @@ const processWebhookData = () => {
 //     body += chunk;
 //   });
 
-//   req.on("end", () => {
-//     const webhookData = JSON.parse(body);
-//     // place webhookData in queue here?
-//     // client.rpush("webhookqueue", JSON.stringify( {`notebook:${notebookId}`body)});
+// req.on("end", () => {
+//   const webhookData = JSON.parse(body);
+//   // place webhookData in queue here?
+//   // client.rpush("webhookqueue", JSON.stringify( {`notebook:${notebookId}`body)});
 
-//     // https://redis.io/commands/blpop
-//     // client.blpop()
-//     console.log(webhookData);
+//   // https://redis.io/commands/blpop
+//   // client.blpop()
+//   console.log(webhookData);
 
-//     db("WEBHOOK", null, notebookId, webhookData);
-//     res.writeHead(200);
-//     res.end();
-//   });
+//   db("WEBHOOK", null, notebookId, webhookData);
+//   res.writeHead(200);
+//   res.end();
+// });
 // };
 
 const log = (...messages) => {

@@ -54,12 +54,14 @@ const proxyServer = https.createServer(https_options, (req, res) => {
       helpers.startNewSession(req, res, sessions);
     } else if (req.method === "POST") {
       if (req.url.match(/\/webhooks\/(.*)/)) {
-        // implement redis queue here ?
-        // - as requests identified as new webhook data arrive, place them in a queue so as not to overwhelm the DB
-        // - what is the shape of the data stored in the redis queue?
-        // - potential schema for a redis key :  "object-type:id"  ->  "notebook:1234-erger-12we32-wegrwrb"
-        // -
-        helpers.saveWebhook(req, res);
+        try {
+          helpers.enqueueWebhookData(req, res);
+          helpers.processWebhookData(req, res);
+        } catch (error) {
+          console.error(error);
+        }
+        res.writeHead(200);
+        res.end();
       } else if (req.url === "/email") {
         helpers.sendEmail(req, res);
       }
@@ -94,8 +96,6 @@ const proxyServer = https.createServer(https_options, (req, res) => {
   }
 });
 
-helpers.teardownZombieContainers(sessions);
-
 proxyServer.on("upgrade", (req, socket, head) => {
   if (sessions[req.headers.host]) {
     let containerIP;
@@ -109,6 +109,8 @@ proxyServer.on("upgrade", (req, socket, head) => {
     proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
   }
 });
+
+helpers.teardownZombieContainers(sessions);
 
 proxyServer.listen(443, () => {
   helpers.log("Listening on port 443...");

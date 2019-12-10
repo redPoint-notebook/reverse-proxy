@@ -5,6 +5,8 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const nodemailer = require("nodemailer");
+const redis = require("redis");
+const redisClient = redis.createClient();
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -150,7 +152,8 @@ const teardownZombieContainers = sessions => {
     });
   }, 15000);
 };
-const saveWebhook = (req, res) => {
+
+const enqueueWebhookData = (req, res) => {
   const matchData = req.url.match(/\/webhooks\/(.*)/);
   let notebookId;
   let body = "";
@@ -167,13 +170,67 @@ const saveWebhook = (req, res) => {
 
   req.on("end", () => {
     const webhookData = JSON.parse(body);
-    console.log(webhookData);
+    // place webhookData in queue here?
+    redisClient.rpush(
+      "webhookqueue",
+      JSON.stringify({ [notebookId]: webhookData })
+    ); // { [notebookId]: body } ?
 
-    db("WEBHOOK", null, notebookId, webhookData);
-    res.writeHead(200);
-    res.end();
+    // https://redis.io/commands/blpop
+    // client.blpop()
+    console.log(webhookData);
   });
 };
+
+const processWebhookData = () => {
+  const intId = setInterval(() => {
+    // if anything in queue, process it using BLPOP - blocking list left pop
+    client.blpop("webhookqueue", 0, (err, msg) => {
+      let notebookId = msg[0];
+      let webhookData = msg[1];
+
+      // console.log("List Name : ", msg[0]);
+      // console.log("Data : ", msg[1]);
+      db("WEBHOOK", null, notebookId, webhookData);
+      res.writeHead(200);
+      res.end();
+      if (!msg) {
+        clearInterval(intId);
+        client.quit();
+      }
+    });
+  }, 100);
+};
+
+// const saveWebhook = (req, res) => {
+//   const matchData = req.url.match(/\/webhooks\/(.*)/);
+//   let notebookId;
+//   let body = "";
+
+//   if (matchData) {
+//     notebookId = matchData[1];
+//   }
+
+//   console.log("Webhook notebook id is :", notebookId);
+
+//   req.on("data", chunk => {
+//     body += chunk;
+//   });
+
+//   req.on("end", () => {
+//     const webhookData = JSON.parse(body);
+//     // place webhookData in queue here?
+//     // client.rpush("webhookqueue", JSON.stringify( {`notebook:${notebookId}`body)});
+
+//     // https://redis.io/commands/blpop
+//     // client.blpop()
+//     console.log(webhookData);
+
+//     db("WEBHOOK", null, notebookId, webhookData);
+//     res.writeHead(200);
+//     res.end();
+//   });
+// };
 
 const log = (...messages) => {
   let date = new Date();
@@ -230,6 +287,8 @@ module.exports.loadNotebook = loadNotebook;
 module.exports.startNewSession = startNewSession;
 module.exports.tearDown = tearDown;
 module.exports.teardownZombieContainers = teardownZombieContainers;
-module.exports.saveWebhook = saveWebhook;
+// module.exports.saveWebhook = saveWebhook;
+module.exports.enqueueWebhookData = enqueueWebhookData;
+module.exports.processWebhookData = processWebhookData;
 module.exports.sendEmail = sendEmail;
 module.exports.log = log;

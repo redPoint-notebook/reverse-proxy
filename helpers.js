@@ -185,7 +185,7 @@ const enqueueWebhookData = (req, res) => {
 const processWebhookData = () => {
   const intId = setInterval(() => {
     // if anything in queue, process it using BLPOP - blocking list left pop
-    client.blpop("webhookqueue", 0, (err, msg) => {
+    redisClient.blpop("webhookqueue", 0, (err, msg) => {
       let notebookId = msg[0];
       let webhookData = msg[1];
 
@@ -196,7 +196,7 @@ const processWebhookData = () => {
       res.end();
       if (!msg) {
         clearInterval(intId);
-        client.quit();
+        redisClient.quit();
       }
     });
   }, 100);

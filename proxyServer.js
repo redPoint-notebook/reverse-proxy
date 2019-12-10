@@ -54,6 +54,11 @@ const proxyServer = https.createServer(https_options, (req, res) => {
       helpers.startNewSession(req, res, sessions);
     } else if (req.method === "POST") {
       if (req.url.match(/\/webhooks\/(.*)/)) {
+        // implement redis queue here ?
+        // - as requests identified as new webhook data arrive, place them in a queue so as not to overwhelm the DB
+        // - what is the shape of the data stored in the redis queue?
+        // - potential schema for a redis key :  "object-type:id"  ->  "notebook:1234-erger-12we32-wegrwrb"
+        // -
         helpers.saveWebhook(req, res);
       } else if (req.url === "/email") {
         helpers.sendEmail(req, res);

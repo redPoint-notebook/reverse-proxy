@@ -283,3 +283,4 @@ module.exports.saveWebhook = saveWebhook;
 module.exports.sendEmail = sendEmail;
 module.exports.log = log;
 module.exports.sessionExists = sessionExists;
+module.exports.getSessionData = getSessionData;

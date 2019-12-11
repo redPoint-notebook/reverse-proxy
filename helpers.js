@@ -6,6 +6,7 @@ const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
+const RedisSMQ = require("rsmq");
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -20,6 +21,17 @@ const transporter = nodemailer.createTransport({
     user: EMAIL_USER,
     pass: EMAIL_PASSWORD
   }
+});
+
+let QUEUENAME = "testqueue";
+let NAMESPACE = "rsmq";
+let REDIS_HOST = "127.0.0.1";
+let REDIS_PORT = "6379";
+
+const rsmq = new RedisSMQ({
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  ns: NAMESPACE
 });
 
 const saveOrCloneNotebook = (req, res, sessions) => {
@@ -235,6 +247,58 @@ const sendEmail = (req, res) => {
   });
 };
 
+const createQueue = () => {
+  rsmq.createQueue({ qname: QUEUENAME }, err => {
+    if (err) {
+      if (err.name !== "queueExists") {
+        console.error(err);
+        return;
+      } else {
+        console.log("The queue exists. That's OK.");
+      }
+    }
+    console.log("queue created");
+  });
+};
+
+const addMessage = (req, res) => {
+  const matchData = req.url.match(/\/webhooks\/(.*)/);
+  let notebookId;
+  let body = "";
+
+  if (matchData) {
+    notebookId = matchData[1];
+  }
+
+  console.log("Inside addMessage!");
+
+  req.on("data", chunk => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    const webhookData = JSON.parse(body);
+    // console.log(webhookData);
+    rsmq.sendMessage(
+      {
+        qname: QUEUENAME,
+        message: JSON.stringify({ notebookId, webhookData }),
+        delay: 0
+      },
+      err => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+      }
+    );
+    console.log("Pushed new webhookData message into queue");
+
+    res.writeHead(200);
+    res.end();
+  });
+};
+
 module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
 module.exports.loadNotebook = loadNotebook;
 module.exports.startNewSession = startNewSession;
@@ -243,3 +307,5 @@ module.exports.teardownZombieContainers = teardownZombieContainers;
 module.exports.saveWebhook = saveWebhook;
 module.exports.sendEmail = sendEmail;
 module.exports.log = log;
+module.exports.addMessage = addMessage;
+module.exports.createQueue = createQueue;

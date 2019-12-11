@@ -42,7 +42,9 @@ const getSessionData = req => {
       if (err) {
         rej(err);
       } else {
-        res(JSON.parse(string));
+        let parsedSessionData = JSON.parse(string);
+        console.log("parsedSessionData : ", parsedSessionData);
+        res(parsedSessionData);
       }
     });
   });
@@ -62,7 +64,11 @@ const saveOrCloneNotebook = (req, res, sessions) => {
       getSessionData(req)
         .then(sessionData => {
           sessionData.notebookId = notebookData.id;
-          client.hset("dummySessions", req.headers.host, sessionData);
+          client.hset(
+            "dummySessions",
+            req.headers.host,
+            JSON.stringify(sessionData)
+          );
         })
         .catch(err => {
           console.log(err);

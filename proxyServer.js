@@ -105,17 +105,36 @@ const proxyServer = https.createServer(https_options, (req, res) => {
 helpers.teardownZombieContainers();
 
 proxyServer.on("upgrade", (req, socket, head) => {
-  if (sessions[req.headers.host]) {
-    let containerIP;
-    if (sessions[req.headers.host].ip) {
-      (containerIP = "sessions[req.headers.host].ip : "),
-        sessions[req.headers.host].ip;
-    }
+  helpers
+    .getSessionData(req)
+    .then(sessionData => {
+      if (sessionData) {
+        // let containerIP;
+        // if (sessionData.ip) {
+        //   (containerIP = "sessions[req.headers.host].ip : "),
+        //     sessions[req.headers.host].ip;
+        // }
 
-    helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
+        // helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
 
-    proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
-  }
+        proxy.ws(req, socket, head, { target: sessionData.ip });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
+
+  // if (sessions[req.headers.host]) {
+  //   let containerIP;
+  //   if (sessions[req.headers.host].ip) {
+  //     (containerIP = "sessions[req.headers.host].ip : "),
+  //       sessions[req.headers.host].ip;
+  //   }
+
+  //   helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
+
+  //   proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
+  // }
 });
 
 proxyServer.listen(443, () => {

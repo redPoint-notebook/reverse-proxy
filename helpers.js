@@ -30,17 +30,23 @@ const sessionExists = async host => {
   return await hexistsAsync("dummySessions", host);
 };
 
-const getSessionData = req => {
-  client.hget("dummySessions", req.headers.host, (err, string) => {
-    return JSON.parse(string);
-  });
-};
-
-// const sessionExists = host => {
-//   client.hexists("dummySessions", host, (err, result) => {
-//     return !!result;
+// const getSessionData = req => {
+//   client.hget("dummySessions", req.headers.host, (err, string) => {
+//     return JSON.parse(string);
 //   });
 // };
+
+const getSessionData = req => {
+  return new Promise((res, rej) => {
+    client.hget("dummySessions", req.headers.host, (err, string) => {
+      if (err) {
+        rej(err);
+      } else {
+        res(JSON.parse(string));
+      }
+    });
+  });
+};
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -53,9 +59,14 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   req.on("end", () => {
     const notebookData = JSON.parse(body);
     if (isSave) {
-      const sessionData = getSessionData(req);
-      sessionData.notebookId = notebookData.id;
-      client.hset("dummySessions", req.headers.host, sessionData);
+      getSessionData(req)
+        .then(sessionData => {
+          sessionData.notebookId = notebookData.id;
+          client.hset("dummySessions", req.headers.host, sessionData);
+        })
+        .catch(err => {
+          console.log(err);
+        });
       // sessions[req.headers.host].notebookId = notebookData.id;
     }
 
@@ -79,22 +90,54 @@ const loadNotebook = (req, res, sessions) => {
   console.log("Sessions : ", sessions);
   console.log("===================================");
 
-  const notebookId = getSessionData(req).notebookId;
+  getSessionData(req)
+    .then(sessionData => {
+      const notebookId = sessionData.notebookId;
+      if (notebookId) {
+        db("LOAD", null, notebookId).then(data => {
+          log(`Loaded notebook : ${data}`);
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          return res.end(JSON.stringify(data));
+        });
+      } else {
+        res.end(JSON.stringify(null));
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
 
   // const notebookId = sessions[req.headers.host].notebookId;
-  if (notebookId) {
-    db("LOAD", null, notebookId).then(data => {
-      log(`Loaded notebook : ${data}`);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      return res.end(JSON.stringify(data));
-    });
-  } else {
-    res.end(JSON.stringify(null));
-  }
 };
 
 const tearDown = (req, res, sessions) => {
   console.log("INSIDE TEARDOWN");
+
+  getSessionData(req)
+    .then(sessionData => {
+      const lastVisit = sessionData.lastVisited;
+      const containerId = sessionData.containerId;
+
+      setTimeout(() => {
+        getSessionData(req)
+          .then(data => {
+            if (lastVisit === data.lastVisited) {
+              log("DELETING SESSION AND CONTAINER");
+              docker.getContainer(containerId).remove({ force: true });
+              client.hdel("dummySessions", req.headers.host);
+              // delete sessions[req.headers.host];
+              res.writeHead(202);
+              return res.end("DELETED");
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }, 10000);
+    })
+    .catch(err => {
+      console.log(err);
+    });
 
   const session = getSessionData(req);
   const lastVisit = session.lastVisited;

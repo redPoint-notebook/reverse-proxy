@@ -176,7 +176,7 @@ const enqueueWebhookData = (req, res) => {
       JSON.stringify({ [notebookId]: webhookData })
     );
 
-    // console.log(webhookData);
+    console.log(redisClient.lrange("webhookqueue, 0, -1"));
   });
 };
 

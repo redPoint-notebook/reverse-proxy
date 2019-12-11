@@ -74,7 +74,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
     ) {
       // save or clone notebook
       helpers.saveOrCloneNotebook(req, res, sessions);
-    } else if (helpers.sessionExists(host).then(res => !res)) {
+    } else if (false) {
       // subdomain is not in the sessions object
       console.log("Could not find session");
       res.writeHead(404);

@@ -1,5 +1,6 @@
 const redis = require("redis");
 const redisClient = redis.createClient();
+const db = require("./db");
 
 const intId = setInterval(() => {
   // if anything in queue, process it using BLPOP - blocking list left pop

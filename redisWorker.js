@@ -1,13 +1,6 @@
 require("dotenv").config();
 const db = require("./db");
-
 const RedisSMQ = require("rsmq");
-
-// const QUEUENAME = "testqueue";
-// const NAMESPACE = "rsmq";
-// const REDIS_HOST = "127.0.0.1";
-// const REDIS_PORT = "6379";
-
 const QUEUENAME = process.env.QUEUENAME;
 const NAMESPACE = process.env.NAMESPACE;
 const REDIS_HOST = process.env.REDIS_HOST;
@@ -20,7 +13,6 @@ const rsmq = new RedisSMQ({
 });
 
 const startRedisWorker = () => {
-  // check for new messages on a delay
   console.log("Redis Worker started");
 
   setInterval(() => {
@@ -37,15 +29,20 @@ const startRedisWorker = () => {
         console.log("Redis worker says notebook id is: ", notebookId);
         console.log("Redis worker says webhookData is: ", webhookData);
 
-        db("WEBHOOK", null, notebookId, webhookData);
-
-        rsmq.deleteMessage({ qname: QUEUENAME, id: resp.id }, err => {
-          if (err) {
-            console.error(err);
-            return;
-          }
-          console.log("Redis Worker deleted message with id", resp.id);
-        });
+        db("WEBHOOK", null, notebookId, webhookData)
+          .then(data => {
+            console.log("Webhook save data: ", data);
+            rsmq.deleteMessage({ qname: QUEUENAME, id: resp.id }, err => {
+              if (err) {
+                console.error(err);
+                return;
+              }
+              console.log("Redis Worker deleted message with id", resp.id);
+            });
+          })
+          .catch(err => {
+            console.log(err);
+          });
       } else {
         console.log("No messages currently in queue");
       }

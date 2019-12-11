@@ -14,6 +14,10 @@ const IMAGE = process.env.IMAGE;
 const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
 const EMAIL_USER = process.env.EMAIL_USER;
 const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const QUEUENAME = process.env.QUEUENAME;
+const NAMESPACE = process.env.NAMESPACE;
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
 
 const transporter = nodemailer.createTransport({
   service: EMAIL_SERVICE,
@@ -22,16 +26,6 @@ const transporter = nodemailer.createTransport({
     pass: EMAIL_PASSWORD
   }
 });
-
-// let QUEUENAME = "testqueue";
-// let NAMESPACE = "rsmq";
-// let REDIS_HOST = "127.0.0.1";
-// let REDIS_PORT = "6379";
-
-const QUEUENAME = process.env.QUEUENAME;
-const NAMESPACE = process.env.NAMESPACE;
-const REDIS_HOST = process.env.REDIS_HOST;
-const REDIS_PORT = process.env.REDIS_PORT;
 
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,

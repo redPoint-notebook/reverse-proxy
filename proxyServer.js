@@ -54,12 +54,12 @@ const proxyServer = https.createServer(https_options, (req, res) => {
       helpers.startNewSession(req, res, sessions);
     } else if (req.method === "POST") {
       if (req.url.match(/\/webhooks\/(.*)/)) {
-        try {
-          helpers.enqueueWebhookData(req, res);
-          helpers.processWebhookData(req, res);
-        } catch (error) {
-          console.error(error);
-        }
+        // try {
+        helpers.enqueueWebhookData(req, res);
+        //   helpers.processWebhookData(req, res);
+        // } catch (error) {
+        //   console.error(error);
+        // }
         res.writeHead(200);
         res.end();
       } else if (req.url === "/email") {

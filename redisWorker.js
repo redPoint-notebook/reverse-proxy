@@ -1,4 +1,6 @@
+require("dotenv").config();
 const db = require("./db");
+
 const RedisSMQ = require("rsmq");
 
 const QUEUENAME = "testqueue";

@@ -314,4 +314,3 @@ module.exports.sendEmail = sendEmail;
 module.exports.log = log;
 module.exports.addMessage = addMessage;
 module.exports.createQueue = createQueue;
-module.exports.startRedisWorker = startRedisWorker;

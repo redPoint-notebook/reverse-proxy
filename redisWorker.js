@@ -1,3 +1,4 @@
+require("dotenv").config();
 const redis = require("redis");
 const redisClient = redis.createClient();
 const db = require("./db");

@@ -7,7 +7,8 @@ const ROOT = process.env.ROOT;
 const SSLKEY = process.env.SSLKEY;
 const SSLCERT = process.env.SSLCERT;
 const fs = require("fs");
-
+const redis = require("redis");
+const client = redis.createClient();
 let sessions = {};
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
@@ -73,7 +74,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
     ) {
       // save or clone notebook
       helpers.saveOrCloneNotebook(req, res, sessions);
-    } else if (!sessions[host]) {
+    } else if (helpers.sessionExists(host).then(res => !res)) {
       // subdomain is not in the sessions object
       console.log("Could not find session");
       res.writeHead(404);

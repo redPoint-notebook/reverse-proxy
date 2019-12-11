@@ -8,6 +8,8 @@ const nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
 const redis = require("redis");
 const client = redis.createClient();
+const { promisify } = require("util");
+const hexistsAsync = promisify(client.hexists).bind(client);
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -24,11 +26,21 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const sessionExists = async host => {
+  return await hexistsAsync("dummySessions", host);
+};
+
 const getSessionData = req => {
   client.hget("dummySessions", req.headers.host, (err, string) => {
     return JSON.parse(string);
   });
 };
+
+// const sessionExists = host => {
+//   client.hexists("dummySessions", host, (err, result) => {
+//     return !!result;
+//   });
+// };
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -270,3 +282,4 @@ module.exports.teardownZombieContainers = teardownZombieContainers;
 module.exports.saveWebhook = saveWebhook;
 module.exports.sendEmail = sendEmail;
 module.exports.log = log;
+module.exports.sessionExists = sessionExists;

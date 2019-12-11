@@ -91,9 +91,11 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           client.hset(
             "dummySessions",
             req.headers.host,
-            JSON.stringify(sessionData)
+            JSON.stringify(sessionData),
+            (err, result) => {
+              proxy.web(req, res, { target: sessionData.ip }, e => {});
+            }
           );
-          proxy.web(req, res, { target: sessionData.ip }, e => {});
         })
         .catch(err => {
           console.log(err);

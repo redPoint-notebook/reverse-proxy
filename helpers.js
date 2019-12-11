@@ -6,6 +6,8 @@ const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
+const redis = require("redis");
+const client = redis.createClient();
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -22,6 +24,12 @@ const transporter = nodemailer.createTransport({
   }
 });
 
+const getSessionData = req => {
+  client.hget("dummySessions", req.headers.host, (err, string) => {
+    return JSON.parse(string);
+  });
+};
+
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
   let body = "";
@@ -33,7 +41,10 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   req.on("end", () => {
     const notebookData = JSON.parse(body);
     if (isSave) {
-      sessions[req.headers.host].notebookId = notebookData.id;
+      const sessionData = getSessionData(req);
+      sessionData.notebookId = notebookData.id;
+      client.hset("dummySessions", req.headers.host, sessionData);
+      // sessions[req.headers.host].notebookId = notebookData.id;
     }
 
     db("SAVE", notebookData, notebookData.id)
@@ -55,7 +66,10 @@ const loadNotebook = (req, res, sessions) => {
   console.log("req.headers.host", req.headers.host);
   console.log("Sessions : ", sessions);
   console.log("===================================");
-  const notebookId = sessions[req.headers.host].notebookId;
+
+  const notebookId = getSessionData(req).notebookId;
+
+  // const notebookId = sessions[req.headers.host].notebookId;
   if (notebookId) {
     db("LOAD", null, notebookId).then(data => {
       log(`Loaded notebook : ${data}`);
@@ -69,14 +83,16 @@ const loadNotebook = (req, res, sessions) => {
 
 const tearDown = (req, res, sessions) => {
   console.log("INSIDE TEARDOWN");
-  const session = sessions[req.headers.host];
+
+  const session = getSessionData(req);
   const lastVisit = session.lastVisited;
   const containerId = session.containerId;
   setTimeout(() => {
     if (lastVisit === session.lastVisited) {
-      log("DELETING SESSION AND CONTAINER", `sessions: ${sessions}`);
+      log("DELETING SESSION AND CONTAINER");
       docker.getContainer(containerId).remove({ force: true });
-      delete sessions[req.headers.host];
+      client.hdel("dummySessions", req.headers.host);
+      // delete sessions[req.headers.host];
       res.writeHead(202);
       return res.end("DELETED");
     }
@@ -123,7 +139,8 @@ const startNewSession = (req, res, sessions) => {
         console.log("IP address of this container is: " + IPAddress);
 
         const containerURL = `http://${IPAddress}:${PORT}`;
-        sessions[sessionURL] = {
+
+        const sessionData = {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000
           containerId,
@@ -131,7 +148,17 @@ const startNewSession = (req, res, sessions) => {
           lastVisited: Date.now()
         };
 
-        console.log("Sessions object: " + JSON.stringify(sessions));
+        client.hmset("dummySessions", sessionURL, JSON.stringify(sessionData));
+
+        // sessions[sessionURL] = {
+        //   // www.asd443.redpoint.com
+        //   ip: containerURL, // http://172.11.78:8000
+        //   containerId,
+        //   notebookId: notebookId || null,
+        //   lastVisited: Date.now()
+        // };
+        // console.log("Sessions object: " + JSON.stringify(sessions));
+
         setTimeout(() => {
           fetch(containerURL + "/checkHealth")
             .then(res => res.json())

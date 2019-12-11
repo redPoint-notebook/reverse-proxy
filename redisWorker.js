@@ -20,4 +20,4 @@ const intId = setInterval(() => {
       db("WEBHOOK", null, notebookId, webhookData);
     }
   });
-}, 100);
+}, 500);

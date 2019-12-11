@@ -84,8 +84,10 @@ const proxyServer = https.createServer(https_options, (req, res) => {
       helpers.loadNotebook(req, res, sessions);
     } else {
       console.log("Proxying request through websocket");
-      sessions[host].lastVisited = Date.now();
-      proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {});
+      const sessionData = helpers.getSessionData(req);
+      sessionData.lastVisited = Date.now();
+      client.hset("dummySessions", req.headers.host, sessionData);
+      proxy.web(req, res, { target: sessionData.ip }, e => {});
     }
   }
 });

@@ -23,15 +23,15 @@ const transporter = nodemailer.createTransport({
   }
 });
 
-// let QUEUENAME = "testqueue";
-// let NAMESPACE = "rsmq";
-// let REDIS_HOST = "127.0.0.1";
-// let REDIS_PORT = "6379";
+let QUEUENAME = "testqueue";
+let NAMESPACE = "rsmq";
+let REDIS_HOST = "127.0.0.1";
+let REDIS_PORT = "6379";
 
-const QUEUENAME = process.env.QUEUENAME;
-const NAMESPACE = process.env.NAMESPACE;
-const REDIS_HOST = process.env.REDIS_HOST;
-const REDIS_PORT = process.env.REDIS_PORT;
+// const QUEUENAME = process.env.QUEUENAME;
+// const NAMESPACE = process.env.NAMESPACE;
+// const REDIS_HOST = process.env.REDIS_HOST;
+// const REDIS_PORT = process.env.REDIS_PORT;
 
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,

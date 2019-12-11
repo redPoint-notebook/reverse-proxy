@@ -3,15 +3,15 @@ const db = require("./db");
 
 const RedisSMQ = require("rsmq");
 
-// const QUEUENAME = "testqueue";
-// const NAMESPACE = "rsmq";
-// const REDIS_HOST = "127.0.0.1";
-// const REDIS_PORT = "6379";
+const QUEUENAME = "testqueue";
+const NAMESPACE = "rsmq";
+const REDIS_HOST = "127.0.0.1";
+const REDIS_PORT = "6379";
 
-const QUEUENAME = process.env.QUEUENAME;
-const NAMESPACE = process.env.NAMESPACE;
-const REDIS_HOST = process.env.REDIS_HOST;
-const REDIS_PORT = process.env.REDIS_PORT;
+// const QUEUENAME = process.env.QUEUENAME;
+// const NAMESPACE = process.env.NAMESPACE;
+// const REDIS_HOST = process.env.REDIS_HOST;
+// const REDIS_PORT = process.env.REDIS_PORT;
 
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,

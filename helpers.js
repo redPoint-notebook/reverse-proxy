@@ -125,6 +125,7 @@ const tearDown = (req, res, sessions) => {
       const containerId = sessionData.containerId;
 
       setTimeout(() => {
+        console.log("Inside setTimeout for Teardown");
         getSessionData(req)
           .then(data => {
             if (lastVisit === data.lastVisited) {

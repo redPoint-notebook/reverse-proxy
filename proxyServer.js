@@ -107,6 +107,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
 helpers.teardownZombieContainers();
 
 proxyServer.on("upgrade", (req, socket, head) => {
+  console.log("Inside Upgrade Listener");
   helpers
     .getSessionData(req)
     .then(sessionData => {

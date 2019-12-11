@@ -14,8 +14,9 @@ const intId = setInterval(() => {
       let notebookId = Object.keys(data)[0];
       let webhookData = data[notebookId];
 
-      console.log("webhookqueue msg : ", msg);
-
+      // console.log("webhookqueue msg : ", msg);
+      console.log("notebookId :", notebookId);
+      console.log("webhookData :", webhookData);
       db("WEBHOOK", null, notebookId, webhookData);
     }
   });

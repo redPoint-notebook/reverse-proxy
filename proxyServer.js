@@ -92,6 +92,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
 
 helpers.teardownZombieContainers();
 helpers.createQueue();
+helpers.startRedisWorker();
 
 proxyServer.on("upgrade", (req, socket, head) => {
   if (sessions[req.headers.host]) {

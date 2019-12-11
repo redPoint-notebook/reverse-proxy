@@ -174,7 +174,7 @@ const enqueueWebhookData = (req, res) => {
     redisClient.rpush(
       "webhookqueue",
       JSON.stringify({ [notebookId]: webhookData })
-    ); // { [notebookId]: body } ?
+    );
 
     // console.log(webhookData);
   });

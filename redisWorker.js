@@ -30,7 +30,6 @@ const startRedisWorker = () => {
 
         db("WEBHOOK", null, notebookId, webhookData)
           .then(data => {
-            console.log("Webhook save data: ", data);
             rsmq.deleteMessage({ qname: QUEUENAME, id: resp.id }, err => {
               if (err) {
                 console.error(err);

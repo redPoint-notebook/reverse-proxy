@@ -251,8 +251,8 @@ const startNewSession = (req, res, sessions) => {
 
 const teardownZombieContainers = () => {
   docker.listContainers((err, containers) => {
-    client.hvals("dummySessions", (err, sessionURLs) => {
-      const allSessionData = sessionURLs.map(val => JSON.parse(val));
+    client.hvals("dummySessions", (err, sessionData) => {
+      const allSessionData = sessionData.map(val => JSON.parse(val));
       const sessionContainerIds = allSessionData.map(data => data.containerId);
       log("session container Ids : ", sessionContainerIds);
 

@@ -21,6 +21,13 @@ const proxy = httpProxy.createProxyServer({
 // ~~~~~~~~~~~~~~~
 // Redirect all traffic from http to https
 const httpServer = http.createServer((req, res) => {
+  helpers.log("Inside httpServer, req.headers.host =", req.headers.host);
+
+  if (req.headers.host === "35.223.58.26") {
+    res.writeHead(404);
+    return res.end();
+  }
+
   helpers.log("Redirecting to HTTPS");
   proxyToHTTPSServer.web(req, res, {
     target: `https://${req.headers.host}${req.url}`

@@ -16,7 +16,6 @@ const startRedisWorker = () => {
   console.log("Redis Worker started");
 
   setInterval(() => {
-    console.log("Redis Worker checking for job");
     rsmq.receiveMessage({ qname: QUEUENAME }, (err, resp) => {
       if (err) {
         console.error(err);
@@ -44,10 +43,9 @@ const startRedisWorker = () => {
             console.log(err);
           });
       } else {
-        console.log("No messages currently in queue");
       }
     });
-  }, 1000);
+  }, 100);
 };
 
 startRedisWorker();

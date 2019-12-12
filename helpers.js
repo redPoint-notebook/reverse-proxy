@@ -212,15 +212,6 @@ const startNewSession = (req, res, sessions) => {
 
         client.hmset("dummySessions", sessionURL, JSON.stringify(sessionData));
 
-        // sessions[sessionURL] = {
-        //   // www.asd443.redpoint.com
-        //   ip: containerURL, // http://172.11.78:8000
-        //   containerId,
-        //   notebookId: notebookId || null,
-        //   lastVisited: Date.now()
-        // };
-        // console.log("Sessions object: " + JSON.stringify(sessions));
-
         setTimeout(() => {
           fetch(containerURL + "/checkHealth")
             .then(res => res.json())
@@ -243,10 +234,44 @@ const startNewSession = (req, res, sessions) => {
   });
 };
 
+// const teardownZombieContainers = sessions => {
+//   setInterval(() => {
+//     docker.listContainers((err, containers) => {
+//       const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
+//         return sessions[sessionUrl].containerId;
+//       });
+//       containers.forEach(containerInfo => {
+//         if (!sessionContainerIds.includes(containerInfo.Id)) {
+//           docker.getContainer(containerInfo.Id).remove({ force: true });
+//         }
+//       });
+//     });
+//   }, 15000);
+// };
+
+const tearDownContainers = () => {
+  return new Promise((res, rej) => {
+    client.hget("dummySessions", req.headers.host, (err, string) => {
+      if (err) {
+      } else {
+      }
+    });
+  });
+};
+
 const teardownZombieContainers = () => {
   docker.listContainers((err, containers) => {
-    containers.forEach(containerInfo => {
-      docker.getContainer(containerInfo.Id).remove({ force: true });
+    client.hvals("dummySessions", (err, vals) => {
+      const allSessionData = vals.map(val => JSON.parse(val));
+      const sessionContainerIds = allSessionData.map(data => data.containerId);
+      console.log(sessionContainerIds);
+
+      // kill container if no session exists
+      containers.forEach(containerInfo => {
+        if (!sessionContainerIds.includes(containerInfo.Id)) {
+          docker.getContainer(containerInfo.Id).remove({ force: true });
+        }
+      });
     });
   });
 };

@@ -33,7 +33,9 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   req.on("end", () => {
     const notebookData = JSON.parse(body);
     if (isSave) {
-      sessions[req.headers.host].notebookId = notebookData.id;
+      if (sessions[req.headers.host]) {
+        sessions[req.headers.host].notebookId = notebookData.id;
+      }
     }
 
     db("SAVE", notebookData, notebookData.id)

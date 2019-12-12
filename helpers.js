@@ -4,23 +4,14 @@ const fs = require("fs");
 const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
-const nodemailer = require("nodemailer");
 const fetch = require("node-fetch");
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
-const EMAIL_SERVICE = process.env.EMAIL_SERVICE;
 const EMAIL_USER = process.env.EMAIL_USER;
-const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
-
-const transporter = nodemailer.createTransport({
-  service: EMAIL_SERVICE,
-  auth: {
-    user: EMAIL_USER,
-    pass: EMAIL_PASSWORD
-  }
-});
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -206,8 +197,6 @@ const sendEmail = (req, res) => {
   req.on("end", () => {
     const emailData = JSON.parse(body);
 
-    const notebookURL = emailData.notebookURL;
-
     let emailHtml = fs.readFileSync(__dirname + "/email.html", {
       encoding: "utf-8"
     });
@@ -215,25 +204,27 @@ const sendEmail = (req, res) => {
     emailHtml = emailHtml.replace("${}", emailData.operation);
     emailHtml = emailHtml.replace("$${}", emailData.notebookURL);
 
-    const mailOptions = {
-      from: EMAIL_USER, // sender address
-      to: emailData.emailAddress, // list of receivers
-      subject: "Your Redpoint Notebook URL", // Subject line
-      html: emailHtml
+    const msg = {
+      to: emailData.emailAddress,
+      from: EMAIL_USER,
+      subject: 'Your Redpoint Notebook URL',
+      html: emailHtml,
     };
 
-    transporter.sendMail(mailOptions, function(err, info) {
-      if (err) {
-        console.log("Error sending email: ", err);
-        res.setHeader("Access-Control-Allow-Origin", "*");
-        res.writeHead(200);
-        res.end("Error sending email");
-      } else {
+    sgMail
+      .send(msg)
+      .then(() => {
         res.setHeader("Access-Control-Allow-Origin", "*");
         res.writeHead(200);
         res.end("Email sent");
-      }
-    });
+      })
+      .catch(error => {
+        const errorString = "Error sending email: " + error.toString();
+        console.log(errorString);
+        res.setHeader("Access-Control-Allow-Origin", "*");
+        res.writeHead(200);
+        res.end(errorString);
+      });
   });
 };
 

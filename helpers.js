@@ -5,13 +5,19 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const fetch = require("node-fetch");
+const RedisSMQ = require("rsmq");
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
 const EMAIL_USER = process.env.EMAIL_USER;
+
+const rsmq = new RedisSMQ({
+  host: REDIS_HOST,
+  port: REDIS_PORT,
+  ns: NAMESPACE
+});
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -153,31 +159,6 @@ const teardownZombieContainers = () => {
   });
 };
 
-const saveWebhook = (req, res) => {
-  const matchData = req.url.match(/\/webhooks\/(.*)/);
-  let notebookId;
-  let body = "";
-
-  if (matchData) {
-    notebookId = matchData[1];
-  }
-
-  console.log("Webhook notebook id is :", notebookId);
-
-  req.on("data", chunk => {
-    body += chunk;
-  });
-
-  req.on("end", () => {
-    const webhookData = JSON.parse(body);
-    console.log(webhookData);
-
-    db("WEBHOOK", null, notebookId, webhookData);
-    res.writeHead(200);
-    res.end();
-  });
-};
-
 const log = (...messages) => {
   let date = new Date();
   messages = Array.from(messages);
@@ -228,11 +209,64 @@ const sendEmail = (req, res) => {
   });
 };
 
+const createQueue = () => {
+  rsmq.createQueue({ qname: QUEUENAME }, err => {
+    if (err) {
+      if (err.name !== "queueExists") {
+        console.error(err);
+        return;
+      } else {
+        console.log("The queue exists. That's OK.");
+      }
+    }
+    console.log("queue created");
+  });
+};
+
+const addMessage = (req, res) => {
+  const matchData = req.url.match(/\/webhooks\/(.*)/);
+  let notebookId;
+  let body = "";
+
+  if (matchData) {
+    notebookId = matchData[1];
+  }
+
+  req.on("data", chunk => {
+    body += chunk;
+  });
+
+  req.on("end", () => {
+    const webhookData = JSON.parse(body);
+    console.log("Inside addMessage. Webhook data: ", webhookData);
+    console.log("Inside addMessage. Notebook id: ", notebookId);
+
+    rsmq.sendMessage(
+      {
+        qname: QUEUENAME,
+        message: JSON.stringify({ notebookId, webhookData }),
+        delay: 0
+      },
+      err => {
+        if (err) {
+          console.error(err);
+          return;
+        }
+      }
+    );
+    console.log("Pushed new webhookData message into queue");
+
+    res.writeHead(200);
+    res.end();
+  });
+};
+
 module.exports.saveOrCloneNotebook = saveOrCloneNotebook;
 module.exports.loadNotebook = loadNotebook;
 module.exports.startNewSession = startNewSession;
 module.exports.tearDown = tearDown;
 module.exports.teardownZombieContainers = teardownZombieContainers;
-module.exports.saveWebhook = saveWebhook;
 module.exports.sendEmail = sendEmail;
 module.exports.log = log;
+module.exports.addMessage = addMessage;
+module.exports.createQueue = createQueue;

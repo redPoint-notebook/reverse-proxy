@@ -55,7 +55,6 @@ const proxyServer = https.createServer(https_options, (req, res) => {
     } else if (req.method === "POST") {
       if (req.url.match(/\/webhooks\/(.*)/)) {
         helpers.addMessage(req, res);
-        // helpers.saveWebhook(req, res);
       } else if (req.url === "/email") {
         helpers.sendEmail(req, res);
       }

@@ -112,8 +112,6 @@ const loadNotebook = (req, res, sessions) => {
     .catch(err => {
       console.log(err);
     });
-
-  // const notebookId = sessions[req.headers.host].notebookId;
 };
 
 const tearDown = (req, res, sessions) => {
@@ -145,20 +143,6 @@ const tearDown = (req, res, sessions) => {
     .catch(err => {
       console.log(err);
     });
-
-  // const session = getSessionData(req);
-  // const lastVisit = session.lastVisited;
-  // const containerId = session.containerId;
-  // setTimeout(() => {
-  //   if (lastVisit === session.lastVisited) {
-  //     log("DELETING SESSION AND CONTAINER");
-  //     docker.getContainer(containerId).remove({ force: true });
-  //     client.hdel("dummySessions", req.headers.host);
-  //     // delete sessions[req.headers.host];
-  //     res.writeHead(202);
-  //     return res.end("DELETED");
-  //   }
-  // }, 10000);
 };
 
 const startNewSession = (req, res, sessions) => {
@@ -233,21 +217,6 @@ const startNewSession = (req, res, sessions) => {
     });
   });
 };
-
-// const teardownZombieContainers = sessions => {
-//   setInterval(() => {
-//     docker.listContainers((err, containers) => {
-//       const sessionContainerIds = Object.keys(sessions).map(sessionUrl => {
-//         return sessions[sessionUrl].containerId;
-//       });
-//       containers.forEach(containerInfo => {
-//         if (!sessionContainerIds.includes(containerInfo.Id)) {
-//           docker.getContainer(containerInfo.Id).remove({ force: true });
-//         }
-//       });
-//     });
-//   }, 15000);
-// };
 
 const teardownZombieContainers = () => {
   docker.listContainers((err, containers) => {

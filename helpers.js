@@ -249,22 +249,12 @@ const startNewSession = (req, res, sessions) => {
 //   }, 15000);
 // };
 
-const tearDownContainers = () => {
-  return new Promise((res, rej) => {
-    client.hget("dummySessions", req.headers.host, (err, string) => {
-      if (err) {
-      } else {
-      }
-    });
-  });
-};
-
 const teardownZombieContainers = () => {
   docker.listContainers((err, containers) => {
     client.hvals("dummySessions", (err, sessionURLs) => {
       const allSessionData = sessionURLs.map(val => JSON.parse(val));
       const sessionContainerIds = allSessionData.map(data => data.containerId);
-      console.log(sessionContainerIds);
+      log("session container Ids : ", sessionContainerIds);
 
       // kill container if no session exists
       containers.forEach(containerInfo => {

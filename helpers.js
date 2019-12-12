@@ -146,19 +146,19 @@ const tearDown = (req, res, sessions) => {
       console.log(err);
     });
 
-  const session = getSessionData(req);
-  const lastVisit = session.lastVisited;
-  const containerId = session.containerId;
-  setTimeout(() => {
-    if (lastVisit === session.lastVisited) {
-      log("DELETING SESSION AND CONTAINER");
-      docker.getContainer(containerId).remove({ force: true });
-      client.hdel("dummySessions", req.headers.host);
-      // delete sessions[req.headers.host];
-      res.writeHead(202);
-      return res.end("DELETED");
-    }
-  }, 10000);
+  // const session = getSessionData(req);
+  // const lastVisit = session.lastVisited;
+  // const containerId = session.containerId;
+  // setTimeout(() => {
+  //   if (lastVisit === session.lastVisited) {
+  //     log("DELETING SESSION AND CONTAINER");
+  //     docker.getContainer(containerId).remove({ force: true });
+  //     client.hdel("dummySessions", req.headers.host);
+  //     // delete sessions[req.headers.host];
+  //     res.writeHead(202);
+  //     return res.end("DELETED");
+  //   }
+  // }, 10000);
 };
 
 const startNewSession = (req, res, sessions) => {

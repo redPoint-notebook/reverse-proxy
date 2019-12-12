@@ -226,7 +226,9 @@ const startNewSession = (req, res, sessions) => {
             .then(res => res.json())
             .then(({ webSocketEstablished }) => {
               if (!webSocketEstablished) {
-                delete sessions[sessionURL];
+                // delete sessions[req.headers.host];
+                // delete sessions[sessionURL];
+                client.hdel("dummySessions", sessionURL);
                 docker.getContainer(containerId).remove({ force: true });
               } else {
                 // keep alive. do nothing

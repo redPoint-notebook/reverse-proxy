@@ -9,7 +9,6 @@ const SSLCERT = process.env.SSLCERT;
 const fs = require("fs");
 const redis = require("redis");
 const client = redis.createClient();
-let sessions = {};
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
 
@@ -62,7 +61,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         );
 
         if (req.method === "GET") {
-          helpers.startNewSession(req, res, sessions);
+          helpers.startNewSession(req, res);
         } else if (req.method === "POST") {
           if (req.url.match(/\/webhooks\/(.*)/)) {
             helpers.addMessage(req, res);
@@ -77,13 +76,13 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         if (req.method === "DELETE") {
           console.log("Delete Request received");
           // server.js issues delete request to tear down a container session
-          helpers.tearDown(req, res, sessions);
+          helpers.tearDown(req, res);
         } else if (
           req.method === "POST" &&
           (req.url === "/save" || req.url === "/clone")
         ) {
           // save or clone notebook
-          helpers.saveOrCloneNotebook(req, res, sessions);
+          helpers.saveOrCloneNotebook(req, res);
         } else if (!sessionData) {
           // subdomain is not in the sessions object
           console.log("Could not find session");
@@ -91,7 +90,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           return res.end();
         } else if (req.url === "/loadNotebook" && req.method === "GET") {
           // load notebook from session state if stashed notebookId
-          helpers.loadNotebook(req, res, sessions);
+          helpers.loadNotebook(req, res);
         } else {
           console.log("Proxying request through websocket");
           helpers

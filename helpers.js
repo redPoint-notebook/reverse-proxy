@@ -309,6 +309,7 @@ const addMessage = (req, res) => {
       webhookData = JSON.parse(body);
     } else if (contentType === "application/x-www-form-urlencoded") {
       webhookData = querystring.parse(body);
+      webhookData = JSON.parse(JSON.stringify(webhookData));
     } else {
       res.writeHead(200);
       return res.end();

@@ -9,7 +9,11 @@
       body {
         background-color: #484c55;
         font-family: "Roboto", sans-serif;
-        color: #a0aab5;
+        color: white;
+      }
+
+      progress {
+        margin-top: 20px;
       }
 
       .horizontal-bar {
@@ -24,12 +28,12 @@
         justify-content: center;
       }
     </style>
-    <link
+    <!-- <link
       rel="shortcut icon"
       type="image/png"
       href="https://i.imgur.com/AcDlc2L.png"
-    />
-    <title>Document</title>
+    /> -->
+    <title>Redpoint Notebooks</title>
   </head>
   <body>
     <header>
@@ -43,11 +47,23 @@
       </video>
     </div>
     <div class="flex-container">
+      <progress id="progress" value="10" max="100"></progress>
+    </div>
+    <div class="flex-container">
       <h3>Initializing your notebook...</h3>
-      <p>Please wait while you are redirected to your RedPoint notebook</p>
+    </div>
+    <div class="flex-container">
+      <p>Please wait while we redirect you to your RedPoint notebook</p>
     </div>
   </body>
   <script>
+    let progress = 0;
+    const stop = setInterval(() => {
+      const bar = document.getElementById("progress");
+
+      progress += 0.5;
+      bar.setAttribute("value", String(progress));
+    }, 20);
     // let newLocation = "${}";
     // let requestStatus;
 

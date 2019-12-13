@@ -40,7 +40,7 @@ const getSessionData = req => {
   });
 };
 
-const saveOrCloneNotebook = (req, res, sessions) => {
+const saveOrCloneNotebook = (req, res) => {
   const isSave = /save/.test(req.url);
   let body = "";
 
@@ -78,11 +78,10 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   });
 };
 
-const loadNotebook = (req, res, sessions) => {
+const loadNotebook = (req, res) => {
   console.log("INSIDE LOAD NOTEBOOK");
   console.log("req.url", req.url);
   console.log("req.headers.host", req.headers.host);
-  console.log("Sessions : ", sessions);
   console.log("===================================");
 
   getSessionData(req)
@@ -103,7 +102,7 @@ const loadNotebook = (req, res, sessions) => {
     });
 };
 
-const tearDown = (req, res, sessions) => {
+const tearDown = (req, res) => {
   console.log("INSIDE TEARDOWN");
 
   getSessionData(req)
@@ -119,7 +118,6 @@ const tearDown = (req, res, sessions) => {
               log("DELETING SESSION AND CONTAINER");
               docker.getContainer(containerId).remove({ force: true });
               client.hdel(SESSIONS_OBJ, req.headers.host);
-              // delete sessions[req.headers.host];
               res.writeHead(202);
               return res.end("DELETED");
             }
@@ -134,7 +132,7 @@ const tearDown = (req, res, sessions) => {
     });
 };
 
-const startNewSession = (req, res, sessions) => {
+const startNewSession = (req, res) => {
   const matchData = req.url.match(/\/notebooks\/(.*)/);
   let notebookId;
   if (matchData) {

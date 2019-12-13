@@ -24,15 +24,15 @@ const proxy = httpProxy.createProxyServer({
 const httpServer = http.createServer((req, res) => {
   helpers.log("Inside httpServer, req.headers.host =", req.headers.host);
 
-  if (req.headers.host === "35.223.58.26") {
+  if (/redpointnotebooks/.test(req.headers.host)) {
+    helpers.log("Redirecting to HTTPS");
+    proxyToHTTPSServer.web(req, res, {
+      target: `https://${req.headers.host}${req.url}`
+    });
+  } else {
     res.writeHead(404);
     return res.end();
   }
-
-  helpers.log("Redirecting to HTTPS");
-  proxyToHTTPSServer.web(req, res, {
-    target: `https://${req.headers.host}${req.url}`
-  });
 });
 
 httpServer.listen(80, () => {

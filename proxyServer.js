@@ -6,6 +6,7 @@ const helpers = require("./helpers");
 const ROOT = process.env.ROOT;
 const SSLKEY = process.env.SSLKEY;
 const SSLCERT = process.env.SSLCERT;
+const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
 const fs = require("fs");
 const redis = require("redis");
 const client = redis.createClient();
@@ -99,7 +100,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
             .then(sessionData => {
               sessionData.lastVisited = Date.now();
               client.hset(
-                "dummySessions",
+                SESSIONS_OBJ,
                 req.headers.host,
                 JSON.stringify(sessionData),
                 (err, result) => {

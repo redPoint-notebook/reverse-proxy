@@ -301,9 +301,11 @@ const addMessage = (req, res) => {
   });
 
   req.on("end", () => {
+    helpers.log("inside addMessage, body: ", body);
+
     const webhookData = JSON.parse(body);
-    console.log("Inside addMessage. Webhook data: ", webhookData);
-    console.log("Inside addMessage. Notebook id: ", notebookId);
+    helprs.log("Inside addMessage. Webhook data: ", webhookData);
+    helprs.log("Inside addMessage. Notebook id: ", notebookId);
 
     rsmq.sendMessage(
       {

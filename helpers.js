@@ -5,6 +5,8 @@ const uuidv4 = require("uuid/v4");
 const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const fetch = require("node-fetch");
+const redis = require("redis");
+const client = redis.createClient();
 const RedisSMQ = require("rsmq");
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -19,6 +21,21 @@ const rsmq = new RedisSMQ({
   ns: NAMESPACE
 });
 
+const getSessionData = req => {
+  return new Promise((res, rej) => {
+    client.hget("dummySessions", req.headers.host, (err, string) => {
+      if (err) {
+        rej(err);
+      } else {
+        let parsedSessionData = JSON.parse(string);
+        console.log("parsedSessionData : ", parsedSessionData);
+        res(parsedSessionData);
+      }
+    });
+  });
+};
+
+
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
   let body = "";
@@ -30,9 +47,18 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   req.on("end", () => {
     const notebookData = JSON.parse(body);
     if (isSave) {
-      if (sessions[req.headers.host]) {
-        sessions[req.headers.host].notebookId = notebookData.id;
-      }
+      getSessionData(req)
+        .then(sessionData => {
+          sessionData.notebookId = notebookData.id;
+          client.hset(
+            "dummySessions",
+            req.headers.host,
+            JSON.stringify(sessionData)
+          );
+        })
+        .catch(err => {
+          console.log(err);
+        });
     }
 
     db("SAVE", notebookData, notebookData.id)
@@ -54,32 +80,54 @@ const loadNotebook = (req, res, sessions) => {
   console.log("req.headers.host", req.headers.host);
   console.log("Sessions : ", sessions);
   console.log("===================================");
-  const notebookId = sessions[req.headers.host].notebookId;
-  if (notebookId) {
-    db("LOAD", null, notebookId).then(data => {
-      log(`Loaded notebook : ${data}`);
-      res.setHeader("Access-Control-Allow-Origin", "*");
-      return res.end(JSON.stringify(data));
+
+  getSessionData(req)
+    .then(sessionData => {
+      const notebookId = sessionData.notebookId;
+      if (notebookId) {
+        db("LOAD", null, notebookId).then(data => {
+          log(`Loaded notebook : ${data}`);
+          res.setHeader("Access-Control-Allow-Origin", "*");
+          return res.end(JSON.stringify(data));
+        });
+      } else {
+        res.end(JSON.stringify(null));
+      }
+    })
+    .catch(err => {
+      console.log(err);
     });
-  } else {
-    res.end(JSON.stringify(null));
-  }
 };
 
 const tearDown = (req, res, sessions) => {
   console.log("INSIDE TEARDOWN");
-  const session = sessions[req.headers.host];
-  const lastVisit = session.lastVisited;
-  const containerId = session.containerId;
-  setTimeout(() => {
-    if (lastVisit === session.lastVisited) {
-      log("DELETING SESSION AND CONTAINER", `sessions: ${sessions}`);
-      docker.getContainer(containerId).remove({ force: true });
-      delete sessions[req.headers.host];
-      res.writeHead(202);
-      return res.end("DELETED");
-    }
-  }, 10000);
+
+  getSessionData(req)
+    .then(sessionData => {
+      const lastVisit = sessionData.lastVisited;
+      const containerId = sessionData.containerId;
+
+      setTimeout(() => {
+        console.log("Inside setTimeout for Teardown");
+        getSessionData(req)
+          .then(data => {
+            if (lastVisit === data.lastVisited) {
+              log("DELETING SESSION AND CONTAINER");
+              docker.getContainer(containerId).remove({ force: true });
+              client.hdel("dummySessions", req.headers.host);
+              // delete sessions[req.headers.host];
+              res.writeHead(202);
+              return res.end("DELETED");
+            }
+          })
+          .catch(err => {
+            console.log(err);
+          });
+      }, 10000);
+    })
+    .catch(err => {
+      console.log(err);
+    });
 };
 
 const startNewSession = (req, res, sessions) => {
@@ -122,7 +170,8 @@ const startNewSession = (req, res, sessions) => {
         console.log("IP address of this container is: " + IPAddress);
 
         const containerURL = `http://${IPAddress}:${PORT}`;
-        sessions[sessionURL] = {
+
+        const sessionData = {
           // www.asd443.redpoint.com
           ip: containerURL, // http://172.11.78:8000
           containerId,
@@ -130,13 +179,16 @@ const startNewSession = (req, res, sessions) => {
           lastVisited: Date.now()
         };
 
-        console.log("Sessions object: " + JSON.stringify(sessions));
+        client.hmset("dummySessions", sessionURL, JSON.stringify(sessionData));
+
         setTimeout(() => {
           fetch(containerURL + "/checkHealth")
             .then(res => res.json())
             .then(({ webSocketEstablished }) => {
               if (!webSocketEstablished) {
-                delete sessions[sessionURL];
+                // delete sessions[req.headers.host];
+                // delete sessions[sessionURL];
+                client.hdel("dummySessions", sessionURL);
                 docker.getContainer(containerId).remove({ force: true });
               } else {
                 // keep alive. do nothing
@@ -153,8 +205,17 @@ const startNewSession = (req, res, sessions) => {
 
 const teardownZombieContainers = () => {
   docker.listContainers((err, containers) => {
-    containers.forEach(containerInfo => {
-      docker.getContainer(containerInfo.Id).remove({ force: true });
+    client.hvals("dummySessions", (err, sessionData) => {
+      const allSessionData = sessionData.map(val => JSON.parse(val));
+      const sessionContainerIds = allSessionData.map(data => data.containerId);
+      log("session container Ids : ", sessionContainerIds);
+
+      // kill container if no session exists
+      containers.forEach(containerInfo => {
+        if (!sessionContainerIds.includes(containerInfo.Id)) {
+          docker.getContainer(containerInfo.Id).remove({ force: true });
+        }
+      });
     });
   });
 };
@@ -268,5 +329,6 @@ module.exports.tearDown = tearDown;
 module.exports.teardownZombieContainers = teardownZombieContainers;
 module.exports.sendEmail = sendEmail;
 module.exports.log = log;
+module.exports.getSessionData = getSessionData;
 module.exports.addMessage = addMessage;
 module.exports.createQueue = createQueue;

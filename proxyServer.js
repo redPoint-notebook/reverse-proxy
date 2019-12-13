@@ -7,7 +7,8 @@ const ROOT = process.env.ROOT;
 const SSLKEY = process.env.SSLKEY;
 const SSLCERT = process.env.SSLCERT;
 const fs = require("fs");
-
+const redis = require("redis");
+const client = redis.createClient();
 let sessions = {};
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
@@ -49,68 +50,87 @@ const proxyServer = https.createServer(https_options, (req, res) => {
   // www.redpointnotebooks.com or
   // www.123abc.redpointnotebooks.com
 
-  if (host === ROOT) {
-    helpers.log(
-      "Inside host === ROOT",
-      `Host: ${host}`,
-      `req.method: ${req.method}`,
-      req.method
-    );
+  helpers
+    .getSessionData(req)
+    .then(sessionData => {
+      if (host === ROOT) {
+        helpers.log(
+          "Inside host === ROOT",
+          `Host: ${host}`,
+          `req.method: ${req.method}`,
+          req.method
+        );
 
-    if (req.method === "GET") {
-      helpers.startNewSession(req, res, sessions);
-    } else if (req.method === "POST") {
-      if (req.url.match(/\/webhooks\/(.*)/)) {
-        helpers.addMessage(req, res);
-      } else if (req.url === "/email") {
-        helpers.sendEmail(req, res);
+        if (req.method === "GET") {
+          helpers.startNewSession(req, res, sessions);
+        } else if (req.method === "POST") {
+          if (req.url.match(/\/webhooks\/(.*)/)) {
+            helpers.addMessage(req, res);
+          } else if (req.url === "/email") {
+            helpers.sendEmail(req, res);
+          }
+        }
+      } else if (host !== ROOT) {
+        // host === subdomained url
+        helpers.log("Inside host !== ROOT", `HOST: ${host}`);
+
+        if (req.method === "DELETE") {
+          console.log("Delete Request received");
+          // server.js issues delete request to tear down a container session
+          helpers.tearDown(req, res, sessions);
+        } else if (
+          req.method === "POST" &&
+          (req.url === "/save" || req.url === "/clone")
+        ) {
+          // save or clone notebook
+          helpers.saveOrCloneNotebook(req, res, sessions);
+        } else if (!sessionData) {
+          // subdomain is not in the sessions object
+          console.log("Could not find session");
+          res.writeHead(404);
+          return res.end();
+        } else if (req.url === "/loadNotebook" && req.method === "GET") {
+          // load notebook from session state if stashed notebookId
+          helpers.loadNotebook(req, res, sessions);
+        } else {
+          console.log("Proxying request through websocket");
+          helpers
+            .getSessionData(req)
+            .then(sessionData => {
+              sessionData.lastVisited = Date.now();
+              client.hset(
+                "dummySessions",
+                req.headers.host,
+                JSON.stringify(sessionData),
+                (err, result) => {
+                  proxy.web(req, res, { target: sessionData.ip }, e => {});
+                }
+              );
+            })
+            .catch(err => {
+              console.log(err);
+            });
+        }
       }
-    }
-  } else if (host !== ROOT) {
-    // host === subdomained url
-    helpers.log("Inside host !== ROOT", `HOST: ${host}`);
-
-    if (req.method === "DELETE") {
-      console.log("Delete Request received");
-      // server.js issues delete request to tear down a container session
-      helpers.tearDown(req, res, sessions);
-    } else if (
-      req.method === "POST" &&
-      (req.url === "/save" || req.url === "/clone")
-    ) {
-      // save or clone notebook
-      helpers.saveOrCloneNotebook(req, res, sessions);
-    } else if (!sessions[host]) {
-      // subdomain is not in the sessions object
-      console.log("Could not find session");
-      res.writeHead(404);
-      return res.end();
-    } else if (req.url === "/loadNotebook" && req.method === "GET") {
-      // load notebook from session state if stashed notebookId
-      helpers.loadNotebook(req, res, sessions);
-    } else {
-      console.log("Proxying request through websocket");
-      sessions[host].lastVisited = Date.now();
-      proxy.web(req, res, { target: sessions[req.headers.host].ip }, e => {});
-    }
-  }
+    })
+    .catch(err => {});
 });
 
 helpers.teardownZombieContainers();
 helpers.createQueue();
 
 proxyServer.on("upgrade", (req, socket, head) => {
-  if (sessions[req.headers.host]) {
-    let containerIP;
-    if (sessions[req.headers.host].ip) {
-      (containerIP = "sessions[req.headers.host].ip : "),
-        sessions[req.headers.host].ip;
-    }
-
-    helpers.log("Inside on('upgrade')", `Container IP: ${containerIP}`);
-
-    proxy.ws(req, socket, head, { target: sessions[req.headers.host].ip });
-  }
+  console.log("Inside Upgrade Listener");
+  helpers
+    .getSessionData(req)
+    .then(sessionData => {
+      if (sessionData) {
+        proxy.ws(req, socket, head, { target: sessionData.ip });
+      }
+    })
+    .catch(err => {
+      console.log(err);
+    });
 });
 
 proxyServer.listen(443, () => {

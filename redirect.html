@@ -4,7 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta http-equiv="refresh" content="4;url=https://${}" />
+    <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->
+    <style>
+      body {
+        background-color: #484c55;
+        font-family: "Roboto", sans-serif;
+        color: #a0aab5;
+      }
+
+      .horizontal-bar {
+        margin: -8px -8px 0 -8px;
+        height: 55px;
+        background-color: #353a40;
+      }
+
+      .flex-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
     <link
       rel="shortcut icon"
       type="image/png"
@@ -13,8 +32,20 @@
     <title>Document</title>
   </head>
   <body>
-    <h3>Initializing your notebook...</h3>
-    <p>Please wait while you are redirected to your RedPoint notebook</p>
+    <header>
+      <div class="horizontal-bar"></div>
+    </header>
+    <div class="flex-container">
+      <video autoplay muted="true" loop="true" width="720">
+        <source src="flying-logo-final.mp4" type="video/mp4" />
+
+        Sorry, your browser doesn't support embedded videos.
+      </video>
+    </div>
+    <div class="flex-container">
+      <h3>Initializing your notebook...</h3>
+      <p>Please wait while you are redirected to your RedPoint notebook</p>
+    </div>
   </body>
   <script>
     // let newLocation = "${}";

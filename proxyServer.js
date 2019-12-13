@@ -61,13 +61,10 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           req.method
         );
 
-        helpers.log("req.url: ", req.url);
-
         if (req.method === "GET") {
           helpers.startNewSession(req, res, sessions);
         } else if (req.method === "POST") {
           if (req.url.match(/\/webhooks\/(.*)/)) {
-            helpers.log("matched webhook in url");
             helpers.addMessage(req, res);
           } else if (req.url === "/email") {
             helpers.sendEmail(req, res);

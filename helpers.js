@@ -8,12 +8,16 @@ const fetch = require("node-fetch");
 const redis = require("redis");
 const client = redis.createClient();
 const RedisSMQ = require("rsmq");
-const sgMail = require('@sendgrid/mail');
+const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
 const EMAIL_USER = process.env.EMAIL_USER;
+const REDIS_HOST = process.env.REDIS_HOST;
+const REDIS_PORT = process.env.REDIS_PORT;
+const NAMESPACE = process.env.NAMESPACE;
+const QUEUENAME = process.env.QUEUENAME;
 
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,
@@ -34,7 +38,6 @@ const getSessionData = req => {
     });
   });
 };
-
 
 const saveOrCloneNotebook = (req, res, sessions) => {
   const isSave = /save/.test(req.url);
@@ -249,8 +252,8 @@ const sendEmail = (req, res) => {
     const msg = {
       to: emailData.emailAddress,
       from: EMAIL_USER,
-      subject: 'Your Redpoint Notebook URL',
-      html: emailHtml,
+      subject: "Your Redpoint Notebook URL",
+      html: emailHtml
     };
 
     sgMail

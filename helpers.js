@@ -245,11 +245,12 @@ const sendEmail = (req, res) => {
 
     emailHtml = emailHtml.replace("${}", emailData.operation);
     emailHtml = emailHtml.replace("$${}", emailData.notebookURL);
+    emailHtml = emailHtml.replace("$$${}", emailData.title);
 
     const msg = {
       to: emailData.emailAddress,
       from: EMAIL_USER,
-      subject: "Your Redpoint Notebook URL",
+      subject: `Link To Your Redpoint Notebook ${emailData.title}`,
       html: emailHtml
     };
 

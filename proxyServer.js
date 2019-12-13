@@ -6,6 +6,7 @@ const helpers = require("./helpers");
 const ROOT = process.env.ROOT;
 const SSLKEY = process.env.SSLKEY;
 const SSLCERT = process.env.SSLCERT;
+const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
 const fs = require("fs");
 const redis = require("redis");
 const client = redis.createClient();
@@ -23,15 +24,15 @@ const proxy = httpProxy.createProxyServer({
 const httpServer = http.createServer((req, res) => {
   helpers.log("Inside httpServer, req.headers.host =", req.headers.host);
 
-  if (req.headers.host === "35.223.58.26") {
+  if (/redpointnotebooks/.test(req.headers.host)) {
+    helpers.log("Redirecting to HTTPS");
+    proxyToHTTPSServer.web(req, res, {
+      target: `https://${req.headers.host}${req.url}`
+    });
+  } else {
     res.writeHead(404);
     return res.end();
   }
-
-  helpers.log("Redirecting to HTTPS");
-  proxyToHTTPSServer.web(req, res, {
-    target: `https://${req.headers.host}${req.url}`
-  });
 });
 
 httpServer.listen(80, () => {
@@ -98,7 +99,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
             .then(sessionData => {
               sessionData.lastVisited = Date.now();
               client.hset(
-                "dummySessions",
+                SESSIONS_OBJ,
                 req.headers.host,
                 JSON.stringify(sessionData),
                 (err, result) => {

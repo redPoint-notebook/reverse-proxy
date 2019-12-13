@@ -310,8 +310,6 @@ const addMessage = (req, res) => {
     } else {
       webhookData =
         "RedPoint couldn't parse that webhook format.\nPlease specify 'application/JSON' as the payload Content Type with your webhook provider";
-      res.writeHead(200);
-      return res.end();
     }
 
     log("Inside addMessage. Webhook data: ", webhookData);

@@ -301,7 +301,7 @@ const addMessage = (req, res) => {
   });
 
   req.on("end", () => {
-    const contentType = request.getHeader("Content-Type");
+    const contentType = req.getHeader("Content-Type");
     log("request content type: ", contentType);
 
     const webhookData = JSON.parse(body);

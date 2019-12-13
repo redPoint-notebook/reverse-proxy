@@ -301,7 +301,8 @@ const addMessage = (req, res) => {
   });
 
   req.on("end", () => {
-    log("inside addMessage, body: ", body);
+    const contentType = request.getHeader("Content-Type");
+    log("request content type: ", contentType);
 
     const webhookData = JSON.parse(body);
     log("Inside addMessage. Webhook data: ", webhookData);

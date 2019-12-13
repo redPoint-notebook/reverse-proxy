@@ -289,6 +289,8 @@ const createQueue = () => {
 
 const addMessage = (req, res) => {
   const matchData = req.url.match(/\/webhooks\/(.*)/);
+  const contentType = req.getHeader("Content-Type");
+
   let notebookId;
   let body = "";
 
@@ -301,7 +303,6 @@ const addMessage = (req, res) => {
   });
 
   req.on("end", () => {
-    const contentType = req.getHeader("Content-Type");
     log("request content type: ", contentType);
 
     const webhookData = JSON.parse(body);

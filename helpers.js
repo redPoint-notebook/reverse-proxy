@@ -290,7 +290,7 @@ const createQueue = () => {
 const addMessage = (req, res) => {
   log("inside addMessage");
   const matchData = req.url.match(/\/webhooks\/(.*)/);
-  const contentType = req.getHeader("Content-Type");
+  // const contentType = req.getHeader("Content-Type");
   log("request content type: ", contentType);
 
   let notebookId;

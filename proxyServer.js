@@ -65,7 +65,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.startNewSession(req, res, sessions);
         } else if (req.method === "POST") {
           if (req.url.match(/\/webhooks\/(.*)/)) {
-            helpers.saveWebhook(req, res);
+            helpers.addMessage(req, res);
           } else if (req.url === "/email") {
             helpers.sendEmail(req, res);
           }
@@ -117,6 +117,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
 });
 
 helpers.teardownZombieContainers();
+helpers.createQueue();
 
 proxyServer.on("upgrade", (req, socket, head) => {
   console.log("Inside Upgrade Listener");

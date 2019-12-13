@@ -11,7 +11,7 @@ const RedisSMQ = require("rsmq");
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const qs = require("qs");
-const querystring = require('querystring');
+const querystring = require("querystring");
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
 const IMAGE = process.env.IMAGE;
@@ -308,8 +308,6 @@ const addMessage = (req, res) => {
     let webhookData;
     if (contentType === "application/json") {
       webhookData = JSON.parse(body);
-    } else if (contentType === "application/x-www-form-urlencoded") {
-      webhookData = querystring.parse(body);
     } else {
       res.writeHead(200);
       return res.end();

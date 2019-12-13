@@ -291,7 +291,8 @@ const addMessage = (req, res) => {
   log("inside addMessage");
   const matchData = req.url.match(/\/webhooks\/(.*)/);
   // const contentType = req.getHeader("Content-Type");
-  log("request content type: ", contentType);
+  // log("request content type: ", contentType);
+  log("sanity check");
 
   let notebookId;
   let body = "";

@@ -243,14 +243,16 @@ const sendEmail = (req, res) => {
       encoding: "utf-8"
     });
 
-    emailHtml = emailHtml.replace("${}", emailData.operation);
-    emailHtml = emailHtml.replace("$${}", emailData.notebookURL);
-    emailHtml = emailHtml.replace("$$${}", emailData.title);
+    const title = emailData.title;
+
+    emailHtml = emailHtml.replace("${operation}", emailData.operation);
+    emailHtml = emailHtml.replace("${url}", emailData.notebookURL);
+    emailHtml = emailHtml.replace("${title}", title);
 
     const msg = {
       to: emailData.emailAddress,
       from: EMAIL_USER,
-      subject: `Link To Your Redpoint Notebook ${emailData.title}`,
+      subject: `Link To Your Redpoint Notebook, '${title}'`,
       html: emailHtml
     };
 

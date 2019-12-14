@@ -37,6 +37,7 @@
         mso-table-lspace: 0pt;
         mso-table-rspace: 0pt;
         width: 100%;
+        text-align: center;
       }
 
       table td {
@@ -125,10 +126,11 @@
       }
 
       h1 {
-        font-size: 35px;
+        font-size: 24px;
         font-weight: 300;
         text-align: center;
         text-transform: capitalize;
+        margin-bottom: 20px;
       }
 
       p,
@@ -137,6 +139,7 @@
         font-family: "Roboto", sans-serif;
         font-size: 16px;
         font-weight: normal;
+        line-height: 1.6;
         margin: 0;
         margin-bottom: 15px;
       }
@@ -183,7 +186,7 @@
         color: #ed7164;
         cursor: pointer;
         display: inline-block;
-        font-size: 14px;
+        font-size: 16px;
         font-weight: bold;
         margin: 0;
         padding: 12px 25px;
@@ -264,7 +267,7 @@
       ------------------------------------- */
       @media only screen and (max-width: 620px) {
         table[class="body"] h1 {
-          font-size: 28px !important;
+          font-size: 25px !important;
           margin-bottom: 10px !important;
         }
 
@@ -360,7 +363,7 @@
   </head>
 
   <body class="">
-    <span class="preheader">RedPoint Notebooks URL</span>
+    <span class="preheader">Your RedPoint Notebook</span>
     <table
       role="presentation"
       border="0"
@@ -385,9 +388,10 @@
                   >
                     <tr>
                       <td>
-                        <h3>Hi there!</h3>
+                        <h1>Hi there!</h1>
                         <p>
-                          Here's the ${}d notebook $$${} that you requested.
+                          Here's the link you requested for your <br />
+                          ${operation}d notebook, '${title}'
                         </p>
                         <table
                           role="presentation"
@@ -398,7 +402,7 @@
                         >
                           <tbody>
                             <tr>
-                              <td align="left">
+                              <td align="center">
                                 <table
                                   role="presentation"
                                   border="0"
@@ -408,7 +412,7 @@
                                   <tbody>
                                     <tr>
                                       <td>
-                                        <a href="$${}" target="_blank"
+                                        <a href="${url}" target="_blank"
                                           >Go to notebook</a
                                         >
                                       </td>

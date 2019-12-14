@@ -41,9 +41,11 @@ const db = (requestType, notebook, notebookId, webhookData) => {
             resolve(saveResponse);
           });
         } else if (requestType === "WEBHOOK") {
-          saveWebhookData(collection, notebookId, webhookData).then(saveResponse => {
-            resolve(saveResponse);
-          });
+          saveWebhookData(collection, notebookId, webhookData).then(
+            saveResponse => {
+              resolve(saveResponse);
+            }
+          );
         }
       }).then(queryResult => {
         const after = Date.now();
@@ -82,7 +84,7 @@ const saveNotebook = (collection, notebook) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          reject()
+          reject();
         } else {
           console.log(`Mongo result of insertOne: ${result}`);
           return result;
@@ -92,7 +94,6 @@ const saveNotebook = (collection, notebook) => {
     resolve(saveStatus);
   });
 };
-
 
 const saveWebhookData = (collection, notebookId, webhookData) => {
   return new Promise(resolve => {
@@ -103,7 +104,7 @@ const saveWebhookData = (collection, notebookId, webhookData) => {
       (err, result) => {
         if (err) {
           console.log(err);
-          reject()
+          reject();
         } else {
           console.log("Webhook data added to database");
           console.log(`Mongo result of insertOne: ${result}`);
@@ -114,4 +115,3 @@ const saveWebhookData = (collection, notebookId, webhookData) => {
     resolve(saveStatus);
   });
 };
-

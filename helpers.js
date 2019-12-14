@@ -18,6 +18,7 @@ const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
 const NAMESPACE = process.env.NAMESPACE;
 const QUEUENAME = process.env.QUEUENAME;
+const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
 
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,
@@ -27,7 +28,7 @@ const rsmq = new RedisSMQ({
 
 const getSessionData = req => {
   return new Promise((res, rej) => {
-    client.hget("dummySessions", req.headers.host, (err, string) => {
+    client.hget(SESSIONS_OBJ, req.headers.host, (err, string) => {
       if (err) {
         rej(err);
       } else {
@@ -39,7 +40,7 @@ const getSessionData = req => {
   });
 };
 
-const saveOrCloneNotebook = (req, res, sessions) => {
+const saveOrCloneNotebook = (req, res) => {
   const isSave = /save/.test(req.url);
   let body = "";
 
@@ -54,7 +55,7 @@ const saveOrCloneNotebook = (req, res, sessions) => {
         .then(sessionData => {
           sessionData.notebookId = notebookData.id;
           client.hset(
-            "dummySessions",
+            SESSIONS_OBJ,
             req.headers.host,
             JSON.stringify(sessionData)
           );
@@ -77,11 +78,10 @@ const saveOrCloneNotebook = (req, res, sessions) => {
   });
 };
 
-const loadNotebook = (req, res, sessions) => {
+const loadNotebook = (req, res) => {
   console.log("INSIDE LOAD NOTEBOOK");
   console.log("req.url", req.url);
   console.log("req.headers.host", req.headers.host);
-  console.log("Sessions : ", sessions);
   console.log("===================================");
 
   getSessionData(req)
@@ -102,7 +102,7 @@ const loadNotebook = (req, res, sessions) => {
     });
 };
 
-const tearDown = (req, res, sessions) => {
+const tearDown = (req, res) => {
   console.log("INSIDE TEARDOWN");
 
   getSessionData(req)
@@ -117,8 +117,7 @@ const tearDown = (req, res, sessions) => {
             if (lastVisit === data.lastVisited) {
               log("DELETING SESSION AND CONTAINER");
               docker.getContainer(containerId).remove({ force: true });
-              client.hdel("dummySessions", req.headers.host);
-              // delete sessions[req.headers.host];
+              client.hdel(SESSIONS_OBJ, req.headers.host);
               res.writeHead(202);
               return res.end("DELETED");
             }
@@ -133,7 +132,7 @@ const tearDown = (req, res, sessions) => {
     });
 };
 
-const startNewSession = (req, res, sessions) => {
+const startNewSession = (req, res) => {
   const matchData = req.url.match(/\/notebooks\/(.*)/);
   let notebookId;
   if (matchData) {
@@ -182,16 +181,14 @@ const startNewSession = (req, res, sessions) => {
           lastVisited: Date.now()
         };
 
-        client.hmset("dummySessions", sessionURL, JSON.stringify(sessionData));
+        client.hmset(SESSIONS_OBJ, sessionURL, JSON.stringify(sessionData));
 
         setTimeout(() => {
           fetch(containerURL + "/checkHealth")
             .then(res => res.json())
             .then(({ webSocketEstablished }) => {
               if (!webSocketEstablished) {
-                // delete sessions[req.headers.host];
-                // delete sessions[sessionURL];
-                client.hdel("dummySessions", sessionURL);
+                client.hdel(SESSIONS_OBJ, sessionURL);
                 docker.getContainer(containerId).remove({ force: true });
               } else {
                 // keep alive. do nothing
@@ -208,7 +205,7 @@ const startNewSession = (req, res, sessions) => {
 
 const teardownZombieContainers = () => {
   docker.listContainers((err, containers) => {
-    client.hvals("dummySessions", (err, sessionData) => {
+    client.hvals(SESSIONS_OBJ, (err, sessionData) => {
       const allSessionData = sessionData.map(val => JSON.parse(val));
       const sessionContainerIds = allSessionData.map(data => data.containerId);
       log("session container Ids : ", sessionContainerIds);
@@ -255,7 +252,7 @@ const sendEmail = (req, res) => {
     const msg = {
       to: emailData.emailAddress,
       from: EMAIL_USER,
-      subject: `Your Redpoint Notebook, '${title}`,
+      subject: `Link To Your Redpoint Notebook, '${title}'`,
       html: emailHtml
     };
 

@@ -246,8 +246,9 @@ const sendEmail = (req, res) => {
       encoding: "utf-8"
     });
 
-    emailHtml = emailHtml.replace("${}", emailData.operation);
-    emailHtml = emailHtml.replace("$${}", emailData.notebookURL);
+    emailHtml = emailHtml.replace("${operation}", emailData.operation);
+    emailHtml = emailHtml.replace("${url}", emailData.notebookURL);
+    emailHtml = emailHtml.replace("${title}", emailData.notebookURL);
 
     const msg = {
       to: emailData.emailAddress,

@@ -10,6 +10,7 @@ const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
 const fs = require("fs");
 const redis = require("redis");
 const client = redis.createClient();
+client.auth("foobared");
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
 
@@ -94,7 +95,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else {
           console.log("Proxying request through websocket");
-          client.auth("foobared");
+
           helpers
             .getSessionData(req)
             .then(sessionData => {

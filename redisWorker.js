@@ -5,11 +5,13 @@ const QUEUENAME = process.env.QUEUENAME;
 const NAMESPACE = process.env.NAMESPACE;
 const REDIS_HOST = process.env.REDIS_HOST;
 const REDIS_PORT = process.env.REDIS_PORT;
+const REDIS_PW = process.env.REDIS_PW;
 
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,
   port: REDIS_PORT,
-  ns: NAMESPACE
+  ns: NAMESPACE,
+  auth_pass: REDIS_PW
 });
 
 const startRedisWorker = () => {

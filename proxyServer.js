@@ -7,9 +7,10 @@ const ROOT = process.env.ROOT;
 const SSLKEY = process.env.SSLKEY;
 const SSLCERT = process.env.SSLCERT;
 const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
+const REDIS_PW = process.env.REDIS_PW;
 const fs = require("fs");
 const redis = require("redis");
-const client = redis.createClient();
+const client = redis.createClient({ auth_pass: REDIS_PW });
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
 
@@ -94,6 +95,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else {
           console.log("Proxying request through websocket");
+
           helpers
             .getSessionData(req)
             .then(sessionData => {

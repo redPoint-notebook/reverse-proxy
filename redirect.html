@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta http-equiv="refresh" content="4;url=https://${}" />
+    <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->
     <style>
       body {
         background-color: #484c55;
@@ -12,8 +12,37 @@
         color: white;
       }
 
-      progress {
+      img {
+        margin-left: -48px;
         margin-top: 20px;
+      }
+
+      progress {
+        background-color: #494c54;
+        border: 1px solid #353a40;
+        height: 6px;
+        border-radius: 3px;
+        width: 250px;
+      }
+
+      progress::-webkit-progress-bar {
+        background-color: #353a40;
+        border: 0;
+        height: 6px;
+        border-radius: 3px;
+      }
+      progress::-webkit-progress-value {
+        background-color: #ed7164;
+        border: none;
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      progress::-moz-progress-bar {
+        background-color: #ed7164;
+        border: 0;
+        height: 6px;
+        border-radius: 3px;
       }
 
       .horizontal-bar {
@@ -28,25 +57,23 @@
         justify-content: center;
       }
     </style>
-    <!-- <link
-      rel="shortcut icon"
-      type="image/png"
-      href="https://i.imgur.com/AcDlc2L.png"
-    /> -->
+    <link rel="shortcut icon" type="image/png" href="https://ibb.co/ZN9bmZJ" />
     <title>Redpoint Notebooks</title>
   </head>
   <body>
     <header>
       <div class="horizontal-bar"></div>
     </header>
-    <!-- <div class="flex-container">
-      <img src="redpoint-logo.png" />
-    </div> -->
+    <div class="flex-container">
+      <img
+        src="https://i.ibb.co/f1pBmt2/redpoint-brand-logo-horizontal-on-dark.png"
+      />
+    </div>
     <div class="flex-container">
       <progress id="progress" value="10" max="100"></progress>
     </div>
     <div class="flex-container">
-      <h3>Initializing your notebook...</h3>
+      <h3>Initializing notebook...</h3>
     </div>
     <div class="flex-container">
       <p>Please wait while we redirect you to your notebook</p>
@@ -57,9 +84,12 @@
     const stop = setInterval(() => {
       const bar = document.getElementById("progress");
 
-      progress += 0.25;
-      bar.setAttribute("value", String(progress));
+      if (progress < 100) {
+        progress += 0.25;
+        bar.setAttribute("value", String(progress));
+      }
     }, 10);
+
     // let newLocation = "${}";
     // let requestStatus;
 

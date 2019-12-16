@@ -94,6 +94,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else {
           console.log("Proxying request through websocket");
+          client.auth("topsecret");
           helpers
             .getSessionData(req)
             .then(sessionData => {

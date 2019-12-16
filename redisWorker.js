@@ -9,7 +9,8 @@ const REDIS_PORT = process.env.REDIS_PORT;
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,
   port: REDIS_PORT,
-  ns: NAMESPACE
+  ns: NAMESPACE,
+  auth_pass: "foobared"
 });
 
 const startRedisWorker = () => {

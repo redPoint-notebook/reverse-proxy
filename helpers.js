@@ -6,7 +6,7 @@ const Docker = require("dockerode");
 const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 const fetch = require("node-fetch");
 const redis = require("redis");
-const client = redis.createClient();
+const client = redis.createClient({ auth_pass: "foobared" });
 const RedisSMQ = require("rsmq");
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
@@ -23,7 +23,8 @@ const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
 const rsmq = new RedisSMQ({
   host: REDIS_HOST,
   port: REDIS_PORT,
-  ns: NAMESPACE
+  ns: NAMESPACE,
+  auth_pass: "foobared"
 });
 
 const getSessionData = req => {

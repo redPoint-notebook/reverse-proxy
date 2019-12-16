@@ -9,8 +9,8 @@ const SSLCERT = process.env.SSLCERT;
 const SESSIONS_OBJ = process.env.SESSIONS_OBJ;
 const fs = require("fs");
 const redis = require("redis");
-const client = redis.createClient();
-client.auth("foobared");
+const client = redis.createClient({ password: "foobared" });
+// client.auth("foobared");
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
 

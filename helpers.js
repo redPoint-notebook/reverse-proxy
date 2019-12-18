@@ -29,7 +29,9 @@ const rsmq = new RedisSMQ({
   auth_pass: REDIS_PW
 });
 
-const staticServer = new static.Server("./public");
+const staticServer = new static.Server("./public", {
+  indexFile: "redirect.html"
+});
 
 const getSessionData = req => {
   return new Promise((res, rej) => {

@@ -156,12 +156,7 @@ const startNewSession = (req, res) => {
   // const interpolatedHtml = html.replace("${}", `${sessionURL}`);
   html.replace("${}", `${sessionURL}`);
 
-  req
-    .addListener("end", function() {
-      console.log("Inside static server block");
-      staticServer.serve(req, res);
-    })
-    .resume();
+  staticServer.serve(req, res);
 
   res.end();
 

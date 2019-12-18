@@ -10,6 +10,7 @@ const REDIS_PW = process.env.REDIS_PW;
 const client = redis.createClient({ auth_pass: REDIS_PW });
 const RedisSMQ = require("rsmq");
 const sgMail = require("@sendgrid/mail");
+const static = require("node-static");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 const ROOT_WITHOUT_SUBDOMAIN = process.env.ROOT_WITHOUT_SUBDOMAIN;
 const PORT = process.env.PORT;
@@ -27,6 +28,8 @@ const rsmq = new RedisSMQ({
   ns: NAMESPACE,
   auth_pass: REDIS_PW
 });
+
+const staticServer = new static.Server("./public");
 
 const getSessionData = req => {
   return new Promise((res, rej) => {
@@ -143,14 +146,21 @@ const startNewSession = (req, res) => {
 
   console.log("Notebook ID : ", notebookId);
 
-  const html = fs.readFileSync(__dirname + "/redirect.html", {
+  const html = fs.readFileSync(__dirname + "/public/redirect.html", {
     encoding: "utf-8"
   });
   const sessionId = uuidv4().slice(0, 6);
   const sessionURL = `${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
-  const interpolatedHtml = html.replace("${}", `${sessionURL}`);
+  // const interpolatedHtml = html.replace("${}", `${sessionURL}`);
+  html.replace("${}", `${sessionURL}`);
 
-  res.end(interpolatedHtml);
+  request
+    .addListener("end", function() {
+      staticServer.serve(req, res);
+    })
+    .resume();
+
+  res.end();
 
   const options = {
     Image: IMAGE,

@@ -158,8 +158,6 @@ const startNewSession = (req, res) => {
 
   staticServer.serve(req, res);
 
-  res.end();
-
   const options = {
     Image: IMAGE,
     ExposedPorts: { "8000/tcp": {} },

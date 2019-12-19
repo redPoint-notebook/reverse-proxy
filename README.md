@@ -10,7 +10,7 @@ As a reverse proxy, the dispatch server stands between incoming client requests 
 
 The dispatch server also acts as an intermediary with MongoDB. The decoupling of client-database interaction allows greater database security since any database queries are performed using our prescribed functions. Additionally, abstracting direct database interaction away from the client makes the app easier to maintain, and scale.
 
-Incoming webhook traffic is enqueued using the RedisSMQ library to provide database query rate limiting. A background process dequeues webhook data from the Redis queue stores it in the database.
+Incoming webhook traffic is enqueued using the RedisSMQ library to provide database query rate limiting. A background process dequeues webhook data from the Redis queue and stores it in the database.
 
 ### Session Manager
 

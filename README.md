@@ -1,3 +1,5 @@
+![](redpoint-brand-logo_horizontal-on_light.png)
+
 # Dispatch Server for RedPoint Notebooks
 
 ## Primary Responsibilities :

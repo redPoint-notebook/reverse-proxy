@@ -152,15 +152,15 @@
 
     // JS Redirect: polling
 
-    let newLocation = "https://${}";
-
-    // const pollContainerURL = setInterval(() => {
-    setTimeout(redirectToContainer(), 2500);
-    // }, 500);
+    const newLocation = "https://${}";
 
     const redirectToContainer = () => {
       window.location.href = newLocation;
     };
+
+    setTimeout(() => {
+      redirectToContainer();
+    }, 2500);
   </script>
 
   <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->

@@ -159,8 +159,18 @@
     };
 
     setTimeout(() => {
-      redirectToContainer();
-    }, 2500);
+      testRedirectStatus();
+    }, 1500);
+
+    const testRedirectStatus = () => {
+      fetch(newLocation, {
+        method: "GET",
+        mode: "no-cors",
+        cache: "no-cache"
+      }).then(response => {
+        redirectToContainer();
+      });
+    };
   </script>
 
   <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->

@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <meta http-equiv="refresh" content="4;url=https://${}" />
+    <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -139,6 +139,7 @@
     </div>
   </body>
   <script>
+    // 4 second Progress Bar
     let progress = 0;
     const stop = setInterval(() => {
       const bar = document.getElementById("progress");
@@ -149,17 +150,17 @@
       }
     }, 10);
 
-    // let newLocation = "${}";
-    // let requestStatus;
+    // Redirect logic: polling
+    let newLocation = "https://${}";
 
-    // setTimeout(() => {
-    //   fetch(newLocation).then(response => {
-    //     console.log(response.status);
-    //     if (response.status === 200) {
-    //       resolve(response);
-    //       // window.location = newLocation;
-    //     }
-    //   });
-    // }, 4000);
+    setInterval(() => {
+      fetch(newLocation, { mode: "no-cors" }).then(response => {
+        console.log(response.status);
+        if (response.status === 200) {
+          resolve(response);
+          window.location = newLocation;
+        }
+      });
+    }, 500);
   </script>
 </html>

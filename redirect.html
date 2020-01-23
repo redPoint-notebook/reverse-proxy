@@ -155,25 +155,14 @@
     let newLocation = "https://${}";
 
     const pollContainerURL = setInterval(() => {
-      console.log("Sent poll to server to see if container is ready");
-      // fetch(newLocation, {
-      //   method: "GET",
-      //   mode: "no-cors",
-      //   cache: "no-cache"
-      // }).then(response => {
-      //   console.log(`response: ${response}`);
-      //   console.log(`response.headers: ${response.headers.Headers}`);
-      //   console.log(`response.body: ${response.body}`);
-
-      //   redirectToContainer();
-      // });
       redirectToContainer();
-    }, 500);
+    }, 100);
 
     const redirectToContainer = () => {
       window.location.href = newLocation;
     };
   </script>
 
+  <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->
   <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->
 </html>

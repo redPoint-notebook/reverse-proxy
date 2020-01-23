@@ -154,21 +154,24 @@
     let newLocation = "https://${}";
 
     let pollContainerURL = setInterval(() => {
-      fetch(newLocation, { mode: "no-cors", cache: "no-cache" }).then(
-        response => {
-          console.log(`response.ok: ${response.ok}`);
-          console.log(`response.headers: ${response.headers}`);
+      fetch(newLocation, {
+        method: "GET",
+        mode: "no-cors",
+        cache: "no-cache"
+      }).then(response => {
+        console.log(`response.status: ${response.status}`);
+        console.log(`response.headers: ${response.headers}`);
+        console.log(`response.body: ${response.body}`);
 
-          window.location = newLocation;
-        }
-      );
-    }, 250);
+        // window.location = newLocation;
+      });
+    }, 500);
 
     // fallback, 4 second delay before redirect
-    setTimeout(() => {
-      clearInterval(pollContainerURL);
-      window.location = newLocation;
-    }, 4000);
+    // setTimeout(() => {
+    //   clearInterval(pollContainerURL);
+    //   window.location = newLocation;
+    // }, 4000);
   </script>
 
   <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->

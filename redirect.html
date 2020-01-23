@@ -157,10 +157,7 @@
     setInterval(() => {
       fetch(newLocation, { mode: "no-cors" }).then(response => {
         console.log(response.status);
-
-        if (response.status) {
-          window.location = newLocation;
-        }
+        window.location = newLocation;
       });
     }, 500);
   </script>

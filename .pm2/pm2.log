@@ -1,0 +1,116 @@
+2019-12-08T21:04:43: PM2 log: ===============================================================================
+2019-12-08T21:04:43: PM2 log: --- New PM2 Daemon started ----------------------------------------------------
+2019-12-08T21:04:43: PM2 log: Time                 : Sun Dec 08 2019 21:04:43 GMT-0500 (EST)
+2019-12-08T21:04:43: PM2 log: PM2 version          : 4.2.0
+2019-12-08T21:04:43: PM2 log: Node.js version      : 8.10.0
+2019-12-08T21:04:43: PM2 log: Current arch         : x64
+2019-12-08T21:04:43: PM2 log: PM2 home             : /home/reverse-proxy/.pm2
+2019-12-08T21:04:43: PM2 log: PM2 PID file         : /home/reverse-proxy/.pm2/pm2.pid
+2019-12-08T21:04:43: PM2 log: RPC socket file      : /home/reverse-proxy/.pm2/rpc.sock
+2019-12-08T21:04:43: PM2 log: BUS socket file      : /home/reverse-proxy/.pm2/pub.sock
+2019-12-08T21:04:43: PM2 log: Application log path : /home/reverse-proxy/.pm2/logs
+2019-12-08T21:04:43: PM2 log: Worker Interval      : 30000
+2019-12-08T21:04:43: PM2 log: Process dump file    : /home/reverse-proxy/.pm2/dump.pm2
+2019-12-08T21:04:43: PM2 log: Concurrent actions   : 2
+2019-12-08T21:04:43: PM2 log: SIGTERM timeout      : 1600
+2019-12-08T21:04:43: PM2 log: ===============================================================================
+2019-12-09T14:12:18: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:12:18: PM2 log: App [proxyServer:0] online
+2019-12-09T14:15:30: PM2 log: Stopping app:proxyServer id:0
+2019-12-09T14:15:30: PM2 log: App [proxyServer:0] exited with code [0] via signal [SIGINT]
+2019-12-09T14:15:30: PM2 log: pid=24792 msg=process killed
+2019-12-09T14:17:00: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:17:00: PM2 log: App [proxyServer:0] online
+2019-12-09T14:19:15: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T14:19:15: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:19:15: PM2 log: App [proxyServer:0] online
+2019-12-09T14:19:47: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T14:19:47: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:19:47: PM2 log: App [proxyServer:0] online
+2019-12-09T14:19:52: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T14:19:52: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:19:52: PM2 log: App [proxyServer:0] online
+2019-12-09T14:20:22: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T14:20:22: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:20:22: PM2 log: App [proxyServer:0] online
+2019-12-09T14:21:22: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T14:21:22: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T14:21:22: PM2 log: App [proxyServer:0] online
+2019-12-09T15:07:01: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T15:07:01: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T15:07:01: PM2 log: App [proxyServer:0] online
+2019-12-09T15:08:17: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T15:08:17: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T15:08:17: PM2 log: App [proxyServer:0] online
+2019-12-09T16:39:39: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T16:39:39: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T16:39:39: PM2 log: App [proxyServer:0] online
+2019-12-09T16:42:16: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T16:42:16: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T16:42:16: PM2 log: App [proxyServer:0] online
+2019-12-09T17:37:00: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T17:37:00: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T17:37:00: PM2 log: App [proxyServer:0] online
+2019-12-09T18:58:29: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T18:58:29: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T18:58:29: PM2 log: App [proxyServer:0] online
+2019-12-09T18:58:48: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T18:58:48: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T18:58:48: PM2 log: App [proxyServer:0] online
+2019-12-09T20:10:15: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T20:10:15: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T20:10:15: PM2 log: App [proxyServer:0] online
+2019-12-09T20:40:07: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T20:40:07: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T20:40:07: PM2 error: Error: ENOSPC: no space left on device, write
+    at Object.fs.writeSync (fs.js:735:20)
+    at Object.fs.writeFileSync (fs.js:1309:24)
+    at /usr/local/lib/node_modules/pm2/lib/God/ForkMode.js:258:12
+    at wrapper (/usr/local/lib/node_modules/pm2/node_modules/async/internal/once.js:12:16)
+    at next (/usr/local/lib/node_modules/pm2/node_modules/async/waterfall.js:96:20)
+    at /usr/local/lib/node_modules/pm2/node_modules/async/internal/onlyOnce.js:12:16
+    at WriteStream.<anonymous> (/usr/local/lib/node_modules/pm2/lib/Utility.js:186:13)
+    at emitOne (events.js:116:13)
+    at WriteStream.emit (events.js:211:7)
+    at fs.open (fs.js:2162:10)
+2019-12-09T20:40:07: PM2 log: App [proxyServer:0] online
+2019-12-09T20:40:07: PM2 error: Error: ENOSPC: no space left on device, write
+2019-12-09T20:40:07: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T20:40:07: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T20:40:07: PM2 error: Error: ENOSPC: no space left on device, write
+    at Object.fs.writeSync (fs.js:735:20)
+    at Object.fs.writeFileSync (fs.js:1309:24)
+    at /usr/local/lib/node_modules/pm2/lib/God/ForkMode.js:258:12
+    at wrapper (/usr/local/lib/node_modules/pm2/node_modules/async/internal/once.js:12:16)
+    at next (/usr/local/lib/node_modules/pm2/node_modules/async/waterfall.js:96:20)
+    at /usr/local/lib/node_modules/pm2/node_modules/async/internal/onlyOnce.js:12:16
+    at WriteStream.<anonymous> (/usr/local/lib/node_modules/pm2/lib/Utility.js:186:13)
+    at emitOne (events.js:116:13)
+    at WriteStream.emit (events.js:211:7)
+    at fs.open (fs.js:2162:10)
+2019-12-09T20:40:07: PM2 log: App [proxyServer:0] online
+2019-12-09T20:40:08: PM2 error: Error: ENOSPC: no space left on device, write
+2019-12-09T20:40:08: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T20:40:08: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T20:40:08: PM2 error: Error: ENOSPC: no space left on device, write
+    at Object.fs.writeSync (fs.js:735:20)
+    at Object.fs.writeFileSync (fs.js:1309:24)
+    at /usr/local/lib/node_modules/pm2/lib/God/ForkMode.js:258:12
+    at wrapper (/usr/local/lib/node_modules/pm2/node_modules/async/internal/once.js:12:16)
+    at next (/usr/local/lib/node_modules/pm2/node_modules/async/waterfall.js:96:20)
+    at /usr/local/lib/node_modules/pm2/node_modules/async/internal/onlyOnce.js:12:16
+    at WriteStream.<anonymous> (/usr/local/lib/node_modules/pm2/lib/Utility.js:186:13)
+    at emitOne (events.js:116:13)
+    at WriteStream.emit (events.js:211:7)
+    at fs.open (fs.js:2162:10)
+2019-12-09T20:40:08: PM2 log: App [proxyServer:0] online
+2019-12-09T20:40:08: PM2 error: Error: ENOSPC: no space left on device, write
+2019-12-09T20:40:08: PM2 log: App [proxyServer:0] exited with code [1] via signal [SIGINT]
+2019-12-09T20:40:08: PM2 log: App [proxyServer:0] starting in -fork mode-
+2019-12-09T20:40:08: PM2 error: Error: ENOSPC: no space left on device, write
+    at Object.fs.writeSync (fs.js:735:20)
+    at Object.fs.writeFileSync (fs.js:1309:24)
+    at /usr/local/lib/node_modules/pm2/lib/God/ForkMode.js:258:12
+    at wrapper (/usr/local/lib/node_modules/pm2/node_modules/async/internal/once.js:12:16)
+    at next (/usr/local/lib/node_modules/pm2/node_modules/async/waterfall.js:96:20)
+    at /usr/local/lib

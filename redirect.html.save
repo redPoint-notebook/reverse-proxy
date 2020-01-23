@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <meta http-equiv="refresh" content="4;url=https://${}" />
+    <style>
+      body {
+        background-color: #484c55;
+        font-family: "Roboto", sans-serif;
+        color: white;
+      }
+
+      img {
+        /* margin-left: -28px; */
+        margin-top: 20px;
+        width: 300px;
+      }
+
+      progress {
+        background-color: #494c54;
+        border: 1px solid #353a40;
+        height: 6px;
+        border-radius: 3px;
+        width: 250px;
+        margin-top: 1em;
+      }
+
+      progress::-webkit-progress-bar {
+        background-color: #353a40;
+        border: 0;
+        height: 6px;
+        border-radius: 3px;
+      }
+      progress::-webkit-progress-value {
+        background-color: #ed7164;
+        border: none;
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      progress::-moz-progress-bar {
+        background-color: #ed7164;
+        border: 0;
+        height: 6px;
+        border-radius: 3px;
+      }
+
+      h3 {
+        margin-block-end: 0;
+      }
+
+      .horizontal-bar {
+        margin: -8px -8px 0 -8px;
+        height: 55px;
+        background-color: #353a40;
+      }
+
+      .flex-container {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    </style>
+    <link
+      rel="shortcut icon"
+      type="image/png"
+      href="https://cdn1.imggmi.com/uploads/2019/12/16/cbe0ee7c0609b1d9f517e4b8ee940c9f-full.png"
+    />
+    <title>Redpoint Notebooks</title>
+  </head>
+  <body>
+    <header>
+      <div class="horizontal-bar"></div>
+    </header>
+    <div class="flex-container">
+      <img
+        src="https://cdn1.imggmi.com/uploads/2019/12/16/8c201eb984177d3626c26bab3c357701-full.pnhttps://storage.cloud.google.com/redpoint_bucket/logo-hi-res/redpoint-brand-logo_horizontal-on_dark.pngg"
+        alt="redpoint-brand-logo-horizontal-on-dark"
+        border="0"
+      />
+    </div>
+    <div class="flex-container">
+      <progress id="progress" value="10" max="100"></progress>
+    </div>
+    <div class="flex-container">
+      <h3>Initializing notebook...</h3>
+    </div>
+    <div class="flex-container">
+      <p>Please wait while we redirect you</p>
+    </div>
+  </body>
+  <script>
+    let progress = 0;
+    const stop = setInterval(() => {
+      const bar = document.getElementById("progress");
+
+      if (progress < 100) {
+        progress += 0.25;
+        bar.setAttribute("value", String(progress));
+      }
+    }, 10);
+
+    // let newLocation = "${}";
+    // let requestStatus;
+
+    // setTimeout(() => {
+    //   fetch(newLocation).then(response => {
+    //     console.log(response.status);
+    //     if (response.status === 200) {
+    //       resolve(response);
+    //       // window.location = newLocation;
+    //     }
+    //   });
+    // }, 4000);
+  </script>
+</html>

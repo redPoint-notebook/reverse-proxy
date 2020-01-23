@@ -137,6 +137,7 @@
         <p>Please wait while we redirect you</p>
       </div>
     </div>
+    <a href="https://${}" id="redirect"></a>
   </body>
   <script>
     // 4 second Progress Bar
@@ -151,8 +152,12 @@
     }, 10);
 
     // Redirect logic: polling
+
     setTimeout(() => {
       setInterval(() => {
+        let newLocation = document
+          .getElementById("redirect")
+          .getAttribute("href");
         fetch(newLocation, { mode: "no-cors" }).then(response => {
           console.log(response.status);
           if (response.status === 200) {
@@ -162,7 +167,5 @@
         });
       }, 500);
     }, 500);
-
-    let newLocation = "https://${}";
   </script>
 </html>

@@ -151,16 +151,18 @@
     }, 10);
 
     // Redirect logic: polling
-    let newLocation = "https://${}";
-
-    setInterval(() => {
-      fetch(newLocation, { mode: "no-cors" }).then(response => {
-        console.log(response.status);
-        if (response.status === 200) {
-          resolve(response);
-          window.location = newLocation;
-        }
-      });
+    setTimeout(() => {
+      setInterval(() => {
+        fetch(newLocation, { mode: "no-cors" }).then(response => {
+          console.log(response.status);
+          if (response.status === 200) {
+            resolve(response);
+            window.location = newLocation;
+          }
+        });
+      }, 500);
     }, 500);
+
+    let newLocation = "https://${}";
   </script>
 </html>

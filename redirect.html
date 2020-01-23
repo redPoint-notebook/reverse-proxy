@@ -155,7 +155,9 @@
     let newLocation = "https://${}";
 
     const pollContainerURL = setInterval(() => {
-      redirectToContainer();
+      setTimeout(() => {
+        redirectToContainer();
+      }, 1500);
     }, 500);
 
     const redirectToContainer = () => {

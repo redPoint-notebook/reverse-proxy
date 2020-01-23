@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->
+
     <link
       rel="apple-touch-icon"
       sizes="180x180"
@@ -137,7 +137,6 @@
         <p>Please wait while we redirect you</p>
       </div>
     </div>
-    <a href="https://${}" id="redirect"></a>
   </body>
   <script>
     // 4 second Progress Bar
@@ -155,9 +154,8 @@
 
     setTimeout(() => {
       setInterval(() => {
-        let newLocation = document
-          .getElementById("redirect")
-          .getAttribute("href");
+        let newLocation = "https://${}";
+
         fetch(newLocation, { mode: "no-cors" }).then(response => {
           console.log(response.status);
           if (response.status === 200) {
@@ -168,4 +166,6 @@
       }, 500);
     }, 500);
   </script>
+
+  <!-- <meta http-equiv="refresh" content="4;url=https://${}" /> -->
 </html>

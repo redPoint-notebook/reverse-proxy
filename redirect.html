@@ -158,9 +158,9 @@
       window.location.replace(newLocation);
     };
 
-    setTimeout(() => {
+    const poll = setInterval(() => {
       testRedirectStatus();
-    }, 1500);
+    }, 500);
 
     const testRedirectStatus = () => {
       fetch(newLocation, {
@@ -168,6 +168,7 @@
         mode: "no-cors",
         cache: "no-cache"
       }).then(response => {
+        clearInterval(poll);
         redirectToContainer();
       });
     };

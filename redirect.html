@@ -159,13 +159,13 @@
         mode: "no-cors",
         cache: "no-cache"
       }).then(response => {
-        console.log(`response.status: ${response.status}`);
-        console.log(`response.headers: ${response.headers}`);
+        console.log(`response: ${response}`);
+        console.log(`response.headers: ${response.headers.Headers}`);
         console.log(`response.body: ${response.body}`);
 
-        // window.location = newLocation;
+        window.location = newLocation;
       });
-    }, 500);
+    }, 1000);
 
     // fallback, 4 second delay before redirect
     // setTimeout(() => {

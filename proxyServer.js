@@ -107,6 +107,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
             });
           });
         } else {
+          // this should not be an else branch, else should respond with 404
+          // examine headers / message and perform conditional check to confirm it is a ws msg before proxying
           console.log("Proxying request through websocket");
 
           helpers

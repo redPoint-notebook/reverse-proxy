@@ -168,6 +168,7 @@
         mode: "no-cors",
         cache: "no-cache"
       }).then(response => {
+        // check that the response body === 200, or is it the response.status?
         clearInterval(poll);
         redirectToContainer();
       });

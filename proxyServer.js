@@ -103,7 +103,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         ) {
           // check to see if docker container is ready
           helpers.getSessionData(req).then(sessionData => {
-            helpers.log(
+            console.log(
               `Sending internal fetch request to: ${sessionData.ip +
                 "/checkHealth"}`
             );
@@ -116,6 +116,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 res.writeHead(containerResponse.status, {
                   "Content-Type": "text/plain"
                 });
+                console.log(`response: ${res}`);
                 res.end("ok");
               })
               .catch(err => console.log("Caught in catch block", err));

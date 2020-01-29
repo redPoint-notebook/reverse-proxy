@@ -167,24 +167,30 @@
         method: "GET",
         mode: "no-cors",
         cache: "no-cache"
-      }).then(response => {
-        console.log(response);
-        console.log(response.status);
-        console.log(response.body);
-        console.log(`Response.ok: ${response.ok}`);
-        if (response.ok) {
-          redirectToContainer();
-        } else {
-          console.log("Container not ready yet");
-        }
-        // clearInterval(poll);
-      });
+      })
+        .then(response => response.text())
+        .then(body => {
+          console.log(body);
+        });
+
+      // {
+      //   console.log(response);
+      //   console.log(response.status);
+      //   console.log(response.body);
+      //   console.log(`Response.ok: ${response.ok}`);
+      //   if (response.ok) {
+      //     redirectToContainer();
+      //   } else {
+      //     console.log("Container not ready yet");
+      //   }
+      //   // clearInterval(poll);
+      // });
     };
 
     setTimeout(() => {
       setInterval(() => {
         testRedirectStatus();
-      }, 500);
+      }, 1000);
     }, 1500);
   </script>
 

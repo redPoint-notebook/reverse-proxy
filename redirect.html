@@ -158,9 +158,9 @@
       window.location.href = newLocation;
     };
 
-    const poll = setInterval(() => {
-      testRedirectStatus();
-    }, 500);
+    // const poll = setInterval(() => {
+    //   testRedirectStatus();
+    // }, 500);
 
     const testRedirectStatus = () => {
       fetch(newLocation + "/checkContainerHealth", {
@@ -168,11 +168,14 @@
         mode: "no-cors",
         cache: "no-cache"
       }).then(response => {
+        alert(response.status);
         // check that the response body === 200, or is it the response.status?
-        clearInterval(poll);
+        // clearInterval(poll);
         redirectToContainer();
       });
     };
+
+    testRedirectStatus();
   </script>
 
   <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->

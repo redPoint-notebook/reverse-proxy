@@ -102,12 +102,17 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           req.method === "GET"
         ) {
           // check to see if docker container is ready
-          helpers.getSessionData(req).then(sessionData => {
-            fetch(sessionData.ip + "/checkHealth").then(containerResponse => {
-              console.log(`Container Status: ${containerResponse.status}`);
-              res.end(containerResponse.status);
+          const internalContainerPoll = setInterval(() => {
+            helpers.getSessionData(req).then(sessionData => {
+              fetch(sessionData.ip + "/checkHealth").then(containerResponse => {
+                clearInterval(internalContainerPoll);
+                console.log(
+                  `Received Container Status: ${containerResponse.status}`
+                );
+                res.end(containerResponse.status);
+              });
             });
-          });
+          }, 500);
         } else {
           // this should not be an else branch, else should respond with 404
           // examine headers / message and perform conditional check to confirm it is a ws msg before proxying

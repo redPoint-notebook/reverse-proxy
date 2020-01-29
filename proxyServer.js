@@ -113,10 +113,13 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                   `Received Container Status: ${containerResponse.status}`
                 );
                 console.log("TYPEOF STATUS: ", typeof containerResponse.status);
+                req.on("error", err => {
+                  console.log("Caught in error listener", err);
+                });
                 res.statusCode(containerResponse.status);
                 res.end();
               })
-              .catch(err => console.log(err));
+              .catch(err => console.log("Caught in catch block", err));
           });
         } else {
           // this should not be an else branch, else should respond with 404

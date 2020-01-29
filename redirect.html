@@ -174,16 +174,18 @@
         if (response.ok) {
           redirectToContainer();
         } else {
-          console.log("Container not ready, re-trying in 1 second");
+          console.log("Container not ready, retrying in 500ms");
           setTimeout(() => {
             testRedirectStatus();
-          }, 1000);
+          }, 500);
         }
         // clearInterval(poll);
       });
     };
 
-    testRedirectStatus();
+    setTimeout(() => {
+      testRedirectStatus();
+    }, 1500);
   </script>
 
   <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->

@@ -171,12 +171,12 @@
         console.log(response);
         console.log(response.status);
         console.log(response.body);
-        if (response.status === 200) {
+        if (response.ok) {
           redirectToContainer();
         } else {
           setTimeout(() => {
             testRedirectStatus();
-          }, 500);
+          }, 1000);
         }
         // check that the response body === 200, or is it the response.status?
         // clearInterval(poll);

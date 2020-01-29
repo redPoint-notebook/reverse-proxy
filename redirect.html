@@ -168,7 +168,9 @@
         mode: "no-cors",
         cache: "no-cache"
       }).then(response => {
-        if (response.status == 200) {
+        if (response.status !== 200) {
+          testRedirectStatus();
+        } else {
           redirectToContainer();
         }
         // check that the response body === 200, or is it the response.status?

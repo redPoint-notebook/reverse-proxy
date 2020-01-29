@@ -112,8 +112,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 console.log(
                   `Received Container Status: ${containerResponse.status}`
                 );
-                res.writeHead(containerResponse.status);
-                res.writeHead({ "Content-Encoding": "gzip" });
+                res.writeHead(200);
                 console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
                 res.end();
               })

@@ -103,8 +103,10 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         ) {
           // check to see if docker container is ready
           const internalContainerPoll = setInterval(() => {
+            helpers.log("Internally polling container");
             helpers.getSessionData(req).then(sessionData => {
               fetch(sessionData.ip + "/checkHealth").then(containerResponse => {
+                helpers.log("Clearing Internal Poll");
                 clearInterval(internalContainerPoll);
                 console.log(
                   `Received Container Status: ${containerResponse.status}`

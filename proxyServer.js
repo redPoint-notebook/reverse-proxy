@@ -75,6 +75,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
       } else if (host !== ROOT) {
         // host === subdomained url
         helpers.log("Inside host !== ROOT", `HOST: ${host}`);
+        console.log(`Request URL: ${req.url}`);
+        console.log(`Request Method: ${req.method}`);
 
         if (req.method === "DELETE") {
           console.log("Delete Request received");

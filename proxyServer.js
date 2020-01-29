@@ -103,12 +103,17 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         ) {
           // check to see if docker container is ready
           helpers.getSessionData(req).then(sessionData => {
+            helpers.log(
+              `Sending internal fetch request to: ${sessionData.ip +
+                "/checkHealth"}`
+            );
             fetch(sessionData.ip + "/checkHealth")
               .then(containerResponse => {
                 console.log(
                   `Received Container Status: ${containerResponse.status}`
                 );
-                res.writeHead(containerResponse.status);
+                console.log("TYPEOF STATUS: ", typeof containerResponse.status);
+                res.statusCode(containerResponse.status);
                 res.end();
               })
               .catch(err => console.log(err));

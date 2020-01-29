@@ -112,11 +112,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 console.log(
                   `Received Container Status: ${containerResponse.status}`
                 );
-                res.write("ok");
-                res.writeHead(containerResponse.status, {
-                  "Content-Type": "text/plain"
-                });
-                console.log(`response: ${JSON.stringify(res)}`);
+                // res.writeHead(containerResponse.status);
+                res.writeHead(200);
                 res.end();
               })
               .catch(err => console.log("Caught in catch block", err));

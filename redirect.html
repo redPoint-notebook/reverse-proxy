@@ -174,17 +174,16 @@
         if (response.ok) {
           redirectToContainer();
         } else {
-          console.log("Container not ready, retrying in 500ms");
-          setTimeout(() => {
-            testRedirectStatus();
-          }, 500);
+          console.log("Container not ready yet");
         }
         // clearInterval(poll);
       });
     };
 
     setTimeout(() => {
-      testRedirectStatus();
+      setInterval(() => {
+        testRedirectStatus();
+      }, 500);
     }, 1500);
   </script>
 

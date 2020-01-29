@@ -112,7 +112,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 console.log(
                   `Received Container Status: ${containerResponse.status}`
                 );
-                res.end("200");
+                res.write(String(containerResponse.status));
+                res.end();
               })
               .catch(err => console.log(err));
           });

@@ -113,11 +113,11 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                   `Received Container Status: ${containerResponse.status}`
                 );
                 console.log("TYPEOF STATUS: ", typeof containerResponse.status);
+                res.writeHead(containerResponse.status);
+                res.end();
                 req.on("error", err => {
                   console.log("Caught in error listener", err);
                 });
-                res.writeHead(containerResponse.status);
-                res.end();
               })
               .catch(err => console.log("Caught in catch block", err));
           });

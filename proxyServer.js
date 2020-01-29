@@ -11,6 +11,7 @@ const REDIS_PW = process.env.REDIS_PW;
 const fs = require("fs");
 const redis = require("redis");
 const client = redis.createClient({ auth_pass: REDIS_PW });
+const fetch = require("node-fetch");
 
 const proxyToHTTPSServer = httpProxy.createProxyServer();
 
@@ -74,6 +75,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
       } else if (host !== ROOT) {
         // host === subdomained url
         helpers.log("Inside host !== ROOT", `HOST: ${host}`);
+        console.log(`Request URL: ${req.url}`);
+        console.log(`Request Method: ${req.method}`);
 
         if (req.method === "DELETE") {
           console.log("Delete Request received");
@@ -93,7 +96,21 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         } else if (req.url === "/loadNotebook" && req.method === "GET") {
           // load notebook from session state if stashed notebookId
           helpers.loadNotebook(req, res);
+        } else if (
+          // this is a request to see if container is ready yet
+          req.url === "/checkContainerHealth" &&
+          req.method === "GET"
+        ) {
+          // check to see if docker container is ready
+          helpers.getSessionData(req).then(sessionData => {
+            fetch(sessionData.ip + "/checkHealth").then(containerResponse => {
+              console.log(`Container Status: ${containerResponse.status}`);
+              res.end(containerResponse.status);
+            });
+          });
         } else {
+          // this should not be an else branch, else should respond with 404
+          // examine headers / message and perform conditional check to confirm it is a ws msg before proxying
           console.log("Proxying request through websocket");
 
           helpers

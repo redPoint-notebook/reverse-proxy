@@ -168,12 +168,10 @@
       fetch(newLocation + "/checkContainerHealth", {
         method: "GET",
         mode: "no-cors",
-        cache: "no-cache",
-        headers: {
-          "Accept-Encoding": "gzip"
-        }
+        cache: "no-cache"
       }).then(response => {
         console.log(JSON.stringify(response));
+        console.log(response.status);
         // redirectToContainer();
       });
       // .then(response => {

@@ -170,8 +170,11 @@
       })
         .then(response => response.text())
         .then(body => {
-          console.log(body);
-          if (body == "ok") {
+          console.log(`body: ${body}`);
+          console.log(`body === "ok": ${body === "ok"}`);
+          console.log(`response: ${response}`);
+          console.log(`response.status: ${response.status}`);
+          if (body === "ok") {
             redirectToContainer();
           } else {
             console.log("Container not ready yet");

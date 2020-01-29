@@ -112,6 +112,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 console.log(
                   `Received Container Status: ${containerResponse.status}`
                 );
+                res.write("ok");
                 res.writeHead(containerResponse.status, {
                   "Content-Type": "text/plain"
                 });

@@ -174,11 +174,11 @@
         if (response.ok) {
           redirectToContainer();
         } else {
+          console.log("Container not ready, re-trying in 1 second");
           setTimeout(() => {
             testRedirectStatus();
           }, 1000);
         }
-        // check that the response body === 200, or is it the response.status?
         // clearInterval(poll);
       });
     };

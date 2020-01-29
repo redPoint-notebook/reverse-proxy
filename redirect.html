@@ -158,9 +158,9 @@
       window.location.href = newLocation;
     };
 
-    // const poll = setInterval(() => {
-    //   testRedirectStatus();
-    // }, 500);
+    const pollContainer = setInterval(() => {
+      testRedirectStatus();
+    }, 500);
 
     const testRedirectStatus = () => {
       fetch(newLocation + "/checkContainerHealth", {
@@ -175,6 +175,7 @@
           console.log(`response: ${response}`);
           console.log(`response.status: ${response.status}`);
           if (body === "ok") {
+            clearInterval(pollContainer);
             redirectToContainer();
           } else {
             console.log("Container not ready yet");
@@ -183,10 +184,13 @@
     };
 
     setTimeout(() => {
-      setInterval(() => {
-        testRedirectStatus();
-      }, 1000);
+      pollContainer();
     }, 1500);
+
+    // fallback
+    setTimeout(() => {
+      redirectToContainer();
+    }, 4000);
   </script>
 
   <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->

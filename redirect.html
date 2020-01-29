@@ -171,7 +171,7 @@
         console.log(response);
         console.log(response.status);
         console.log(response.body);
-        if (response.status === 404) {
+        if (response.status === 404 || 0) {
           setTimeout(() => {
             testRedirectStatus();
           }, 500);

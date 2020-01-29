@@ -112,8 +112,9 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 console.log(
                   `Received Container Status: ${containerResponse.status}`
                 );
-                // res.writeHead(containerResponse.status);
-                res.writeHead(200);
+                res.writeHead(containerResponse.status);
+                res.writeHead({ "Content-Encoding": "gzip" });
+                console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
                 res.end();
               })
               .catch(err => console.log("Caught in catch block", err));

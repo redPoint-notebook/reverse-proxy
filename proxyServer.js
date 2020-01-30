@@ -12,8 +12,9 @@ const fs = require("fs");
 const redis = require("redis");
 const client = redis.createClient({ auth_pass: REDIS_PW });
 const fetch = require("node-fetch");
-
 const proxyToHTTPSServer = httpProxy.createProxyServer();
+const Docker = require("dockerode");
+const docker = new Docker({ socketPath: "/var/run/docker.sock" });
 
 const proxy = httpProxy.createProxyServer({
   secure: true,
@@ -107,6 +108,10 @@ const proxyServer = https.createServer(https_options, (req, res) => {
               `Sending internal fetch request to: ${sessionData.ip +
                 "/checkHealth"}`
             );
+
+            console.log("DOCKER CONTAINER : ");
+            console.log(docker.docker.getContainer(sessionData.containerId)); ///////
+
             fetch(sessionData.ip + "/checkHealth")
               .then(containerResponse => {
                 console.log(

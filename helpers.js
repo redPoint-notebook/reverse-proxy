@@ -206,7 +206,7 @@ const startNewSession = (req, res) => {
       });
     })
     .then(container => {
-      interpolatedHtml = interpolatedHtml.replace("#{}", "1");
+      interpolatedHtml = interpolatedHtml.replace("#{}", "0");
       res.end(interpolatedHtml);
     });
 };

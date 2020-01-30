@@ -111,22 +111,25 @@ const proxyServer = https.createServer(https_options, (req, res) => {
 
             // Use Dockerode to check container health :
             if (docker.getContainer(sessionData.containerId)) {
-              helpers.log("DOCKER CONTAINER : ");
-              helpers.log(docker.getContainer(sessionData.containerId));
+              console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
+              res.writeHead(200);
+              res.end();
+              // helpers.log("DOCKER CONTAINER : ");
+              // helpers.log(docker.getContainer(sessionData.containerId));
             } else {
               helpers.log("NO CONTAINER EXISTS");
             }
 
-            fetch(sessionData.ip + "/checkHealth")
-              .then(containerResponse => {
-                console.log(
-                  `Received Container Status: ${containerResponse.status}`
-                );
-                res.writeHead(200);
-                console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
-                res.end();
-              })
-              .catch(err => console.log("Caught in catch block", err));
+            // fetch(sessionData.ip + "/checkHealth")
+            //   .then(containerResponse => {
+            //     console.log(
+            //       `Received Container Status: ${containerResponse.status}`
+            //     );
+            //     res.writeHead(200);
+            //     console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
+            //     res.end();
+            //   })
+            //   .catch(err => console.log("Caught in catch block", err));
           });
         } else {
           // this should not be an else branch, else should respond with 404

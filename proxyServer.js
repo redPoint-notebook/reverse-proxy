@@ -112,8 +112,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
             // Use Dockerode to check container health :
             if (docker.getContainer(sessionData.containerId)) {
               console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
-              res.writeHead(200);
-              res.end();
+              // res.writeHead(200);
+              res.status(200).send();
               // helpers.log("DOCKER CONTAINER : ");
               // helpers.log(docker.getContainer(sessionData.containerId));
             } else {

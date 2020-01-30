@@ -148,7 +148,8 @@ const startNewSession = (req, res) => {
   });
   const sessionId = uuidv4().slice(0, 6);
   const sessionURL = `${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
-  const interpolatedHtml = html.replace("${}", `${sessionURL}`);
+  let interpolatedHtml = html.replace("${}", `${sessionURL}`);
+  interpolatedHtml = interpolatedHtml.replace("#{}", "0");
   // const interpolatedHtml = html.replace(/\$\{\}/g, `${sessionURL}`);
 
   res.end(interpolatedHtml);

@@ -173,6 +173,9 @@
         console.log(JSON.stringify(response));
         console.log(response.status);
         if (response.ok) {
+          console.log("ABOUT TO ATTEMPT REDIRECTION");
+          console.log(`newLocation : ${newLocation}`);
+
           redirectToContainer();
         }
       });

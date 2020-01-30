@@ -158,28 +158,28 @@
       window.location.href = newLocation;
     };
 
-    setTimeout(() => {
-      setInterval(() => {
-        testRedirectStatus();
-      }, 500);
-    }, 1500);
+    // setTimeout(() => {
+    //   setInterval(() => {
+    //     testRedirectStatus();
+    //   }, 500);
+    // }, 1500);
 
-    const testRedirectStatus = () => {
-      fetch(newLocation + "/checkContainerHealth", {
-        method: "GET",
-        mode: "no-cors",
-        cache: "no-cache"
-      }).then(response => {
-        console.log(JSON.stringify(response));
-        console.log(response.status);
-        console.log(`response OK ? => ${response.ok}`);
-        if (response.ok) {
-          console.log("ABOUT TO ATTEMPT REDIRECTION");
-          console.log(`newLocation : ${newLocation}`);
+    // const testRedirectStatus = () => {
+    //   fetch(newLocation + "/checkContainerHealth", {
+    //     method: "GET",
+    //     mode: "no-cors",
+    //     cache: "no-cache"
+    //   }).then(response => {
+    //     console.log(JSON.stringify(response));
+    //     console.log(response.status);
+    //     console.log(`response OK ? => ${response.ok}`);
+    //     if (response.ok) {
+    //       console.log("ABOUT TO ATTEMPT REDIRECTION");
+    //       console.log(`newLocation : ${newLocation}`);
 
-          redirectToContainer();
-        }
-      });
+    //       redirectToContainer();
+    //     }
+    //   });
       // .then(response => {
       //   console.log(`response: ${response}`);
       //   console.log(`response.status: ${response.status}`);
@@ -197,10 +197,10 @@
       // });
     };
 
-    // fallback
-    // setTimeout(() => {
-    //   redirectToContainer();
-    // }, 4000);
+    fallback;
+    setTimeout(() => {
+      redirectToContainer();
+    }, 4000);
   </script>
 
   <!--  move line below up to <head> to use 4 second hardcoded redirect instead-->

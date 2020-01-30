@@ -149,10 +149,9 @@ const startNewSession = (req, res) => {
   const sessionId = uuidv4().slice(0, 6);
   const sessionURL = `${sessionId}.${ROOT_WITHOUT_SUBDOMAIN}`;
   let interpolatedHtml = html.replace("${}", `${sessionURL}`);
-  interpolatedHtml = interpolatedHtml.replace("#{}", "0");
   // const interpolatedHtml = html.replace(/\$\{\}/g, `${sessionURL}`);
 
-  res.end(interpolatedHtml);
+  // res.end(interpolatedHtml);
 
   const options = {
     Image: IMAGE,
@@ -165,46 +164,53 @@ const startNewSession = (req, res) => {
     }
   };
 
-  docker.createContainer(options, (err, container) => {
-    const containerId = container.id;
-    console.log("Id of this container is " + containerId);
+  docker
+    .createContainer(options, (err, container) => {
+      const containerId = container.id;
+      console.log("Id of this container is " + containerId);
 
-    container.start((err, data) => {
-      if (err) console.log(err);
-      container.inspect(container.id).then(data => {
-        const IPAddress = data.NetworkSettings.IPAddress;
-        console.log("IP address of this container is: " + IPAddress);
+      container.start((err, data) => {
+        if (err) console.log(err);
+        container.inspect(container.id).then(data => {
+          const IPAddress = data.NetworkSettings.IPAddress;
+          console.log("IP address of this container is: " + IPAddress);
 
-        const containerURL = `http://${IPAddress}:${PORT}`;
+          const containerURL = `http://${IPAddress}:${PORT}`;
 
-        const sessionData = {
-          // www.asd443.redpoint.com
-          ip: containerURL, // http://172.11.78:8000
-          containerId,
-          notebookId: notebookId || null,
-          lastVisited: Date.now()
-        };
+          const sessionData = {
+            // www.asd443.redpoint.com
+            ip: containerURL, // http://172.11.78:8000
+            containerId,
+            notebookId: notebookId || null,
+            lastVisited: Date.now()
+          };
 
-        client.hmset(SESSIONS_OBJ, sessionURL, JSON.stringify(sessionData));
+          client.hmset(SESSIONS_OBJ, sessionURL, JSON.stringify(sessionData));
 
-        setTimeout(() => {
-          fetch(containerURL + "/checkHealth")
-            .then(res => res.json())
-            .then(({ webSocketEstablished }) => {
-              if (!webSocketEstablished) {
-                client.hdel(SESSIONS_OBJ, sessionURL);
-                docker.getContainer(containerId).remove({ force: true });
-              } else {
-                // keep alive. do nothing
-              }
-            })
-            .catch(err => {
-              console.log("Error : ", err);
-            });
-        }, 30000);
+          setTimeout(() => {
+            fetch(containerURL + "/checkHealth")
+              .then(res => res.json())
+              .then(({ webSocketEstablished }) => {
+                if (!webSocketEstablished) {
+                  client.hdel(SESSIONS_OBJ, sessionURL);
+                  docker.getContainer(containerId).remove({ force: true });
+                } else {
+                  // keep alive. do nothing
+                }
+              })
+              .catch(err => {
+                console.log("Error : ", err);
+              });
+          }, 30000);
+        });
       });
+    })
+    .then(container => {
+      setTimeout(() => {
+        interpolatedHtml = interpolatedHtml.replace("#{}", "0");
+        res.end(interpolatedHtml);
+      }, 500);
     });
-  });
 };
 
 const teardownZombieContainers = () => {

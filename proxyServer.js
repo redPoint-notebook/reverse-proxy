@@ -113,7 +113,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
             if (docker.getContainer(sessionData.containerId)) {
               console.log(`Headers: ${JSON.stringify(res.getHeaders())}`);
               res.writeHead(200);
-              res.end();
+              return res.end();
               // helpers.log("DOCKER CONTAINER : ");
               // helpers.log(docker.getContainer(sessionData.containerId));
             } else {

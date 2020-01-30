@@ -99,6 +99,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else if (
           // this is a request to see if container is ready yet
+          helpers.log("INSIDE /checkContainerHealth");
+
           req.url === "/checkContainerHealth" &&
           req.method === "GET"
         ) {

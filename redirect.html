@@ -158,11 +158,11 @@
       window.location.href = newLocation;
     };
 
-    setTimeout(() => {
-      setInterval(() => {
-        testRedirectStatus();
-      }, 1000);
-    }, 1500);
+    // setTimeout(() => {
+    // }, 1500);
+    setInterval(() => {
+      testRedirectStatus();
+    }, 1000);
 
     const testRedirectStatus = () => {
       fetch(newLocation + "/checkContainerHealth", {

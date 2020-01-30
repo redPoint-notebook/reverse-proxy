@@ -104,10 +104,10 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         ) {
           // check to see if docker container is ready
           helpers.getSessionData(req).then(sessionData => {
-            console.log(
-              `Sending internal fetch request to: ${sessionData.ip +
-                "/checkHealth"}`
-            );
+            // console.log(
+            //   `Sending internal fetch request to: ${sessionData.ip +
+            //     "/checkHealth"}`
+            // );
 
             // Use Dockerode to check container health :
             if (docker.getContainer(sessionData.containerId)) {

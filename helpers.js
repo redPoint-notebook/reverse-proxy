@@ -206,10 +206,8 @@ const startNewSession = (req, res) => {
       });
     })
     .then(container => {
-      setTimeout(() => {
-        interpolatedHtml = interpolatedHtml.replace("#{}", "0");
-        res.end(interpolatedHtml);
-      }, 500);
+      interpolatedHtml = interpolatedHtml.replace("#{}", "0");
+      res.end(interpolatedHtml);
     });
 };
 

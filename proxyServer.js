@@ -109,8 +109,9 @@ const proxyServer = https.createServer(https_options, (req, res) => {
                 "/checkHealth"}`
             );
 
+            // Use Dockerode to check container health :
             console.log("DOCKER CONTAINER : ");
-            console.log(docker.docker.getContainer(sessionData.containerId)); ///////
+            console.log(docker.docker.getContainer(sessionData.containerId));
 
             fetch(sessionData.ip + "/checkHealth")
               .then(containerResponse => {

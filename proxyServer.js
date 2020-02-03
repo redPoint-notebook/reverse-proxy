@@ -76,7 +76,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         helpers.log("Inside host !== ROOT", `HOST: ${host}`);
 
         if (req.method === "DELETE") {
-          console.log("Delete Request received");
+          helpers.log("Delete Request received");
           // server.js issues delete request to tear down a container session
           helpers.tearDown(req, res);
         } else if (
@@ -87,14 +87,14 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.saveOrCloneNotebook(req, res);
         } else if (!sessionData) {
           // subdomain is not in the sessions object
-          console.log("Could not find session");
+          helpers.log("Could not find session");
           res.writeHead(404);
           return res.end();
         } else if (req.url === "/loadNotebook" && req.method === "GET") {
           // load notebook from session state if stashed notebookId
           helpers.loadNotebook(req, res);
         } else {
-          console.log("Proxying request through websocket");
+          helpers.log("Proxying request through websocket");
 
           helpers
             .getSessionData(req)
@@ -110,7 +110,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
               );
             })
             .catch(err => {
-              console.log(err);
+              helpers.log(err);
             });
         }
       }
@@ -122,7 +122,7 @@ helpers.teardownZombieContainers();
 helpers.createQueue();
 
 proxyServer.on("upgrade", (req, socket, head) => {
-  console.log("Inside Upgrade Listener");
+  helpers.log("Inside Upgrade Listener");
   helpers
     .getSessionData(req)
     .then(sessionData => {
@@ -131,7 +131,7 @@ proxyServer.on("upgrade", (req, socket, head) => {
       }
     })
     .catch(err => {
-      console.log(err);
+      helpers.log(err);
     });
 });
 

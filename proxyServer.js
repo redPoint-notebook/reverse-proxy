@@ -95,10 +95,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else {
           helpers.log("Proxying request through websocket");
-          helpers.log(
-            "`Last visited` property on session : ",
-            sessionData.lastVisited
-          );
+
           sessionData.lastVisited = Date.now();
           client.hset(
             SESSIONS_OBJ,
@@ -108,23 +105,6 @@ const proxyServer = https.createServer(https_options, (req, res) => {
               proxy.web(req, res, { target: sessionData.ip }, e => {});
             }
           );
-
-          // helpers
-          //   .getSessionData(req)
-          //   .then(sessionData => {
-          //     sessionData.lastVisited = Date.now();
-          //     client.hset(
-          //       SESSIONS_OBJ,
-          //       req.headers.host,
-          //       JSON.stringify(sessionData),
-          //       (err, result) => {
-          //         proxy.web(req, res, { target: sessionData.ip }, e => {});
-          //       }
-          //     );
-          //   })
-          //   .catch(err => {
-          //     helpers.log(err);
-          //   });
         }
       }
     })

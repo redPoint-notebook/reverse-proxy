@@ -95,7 +95,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else if (req.headers.connection === "keep-alive") {
           helpers.log("Proxying request through websocket");
-          helpers.log("REQUEST HEADERS INSIDE PROXY : ", req.headers);
+          // helpers.log("REQUEST HEADERS INSIDE PROXY : ", req.headers);
           sessionData.lastVisited = Date.now();
           client.hset(
             SESSIONS_OBJ,

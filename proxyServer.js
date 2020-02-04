@@ -23,10 +23,10 @@ const proxy = httpProxy.createProxyServer({
 // ~~~~~~~~~~~~~~~
 // Redirect all traffic from http to https
 const httpServer = http.createServer((req, res) => {
-  helpers.log("Inside httpServer, req.headers.host =", req.headers.host);
+  // helpers.log("Inside httpServer, req.headers.host =", req.headers.host);
 
   if (/redpointnotebooks/.test(req.headers.host)) {
-    helpers.log("Redirecting to HTTPS");
+    // helpers.log("Redirecting to HTTPS");
     proxyToHTTPSServer.web(req, res, {
       target: `https://${req.headers.host}${req.url}`
     });
@@ -37,7 +37,7 @@ const httpServer = http.createServer((req, res) => {
 });
 
 httpServer.listen(80, () => {
-  helpers.log("HTTP Redirect server listening on port 80...");
+  // helpers.log("HTTP Redirect server listening on port 80...");
 });
 // ~~~~~~~~~~~~~~~
 
@@ -55,12 +55,12 @@ const proxyServer = https.createServer(https_options, (req, res) => {
     .getSessionData(req)
     .then(sessionData => {
       if (host === ROOT) {
-        helpers.log(
-          "Inside host === ROOT",
-          `Host: ${host}`,
-          `req.method: ${req.method}`,
-          req.method
-        );
+        // helpers.log(
+        //   "Inside host === ROOT",
+        //   `Host: ${host}`,
+        //   `req.method: ${req.method}`,
+        //   req.method
+        // );
 
         if (req.method === "GET") {
           helpers.startNewSession(req, res);
@@ -73,11 +73,11 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         }
       } else if (host !== ROOT) {
         // host === subdomained url
-        helpers.log("Inside host !== ROOT", `HOST: ${host}`);
+        // helpers.log("Inside host !== ROOT", `HOST: ${host}`);
 
         if (req.method === "DELETE") {
           // server.js issues delete request to tear down a container session
-          helpers.log("Delete Request received");
+          // helpers.log("Delete Request received");
           helpers.tearDown(req, res);
         } else if (
           req.method === "POST" &&
@@ -87,14 +87,14 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.saveOrCloneNotebook(req, res);
         } else if (!sessionData) {
           // subdomain is not in the sessions object
-          helpers.log("Could not find session");
+          // helpers.log("Could not find session");
           res.writeHead(404);
           return res.end();
         } else if (req.url === "/loadNotebook" && req.method === "GET") {
           // load notebook from session state if stashed notebookId
           helpers.loadNotebook(req, res);
         } else {
-          helpers.log("Proxying request through websocket");
+          // helpers.log("Proxying request through websocket");
           // helpers.log("REQUEST HEADERS INSIDE PROXY : ", req.headers);
           sessionData.lastVisited = Date.now();
           client.hset(
@@ -129,5 +129,5 @@ proxyServer.on("upgrade", (req, socket, head) => {
 });
 
 proxyServer.listen(443, () => {
-  helpers.log("Listening on port 443...");
+  // helpers.log("Listening on port 443...");
 });

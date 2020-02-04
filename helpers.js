@@ -35,7 +35,7 @@ const getSessionData = req => {
         rej(err);
       } else {
         let parsedSessionData = JSON.parse(string);
-        console.log("parsedSessionData : ", parsedSessionData);
+        // console.log("parsedSessionData : ", parsedSessionData);
         res(parsedSessionData);
       }
     });
@@ -141,7 +141,7 @@ const startNewSession = (req, res) => {
     notebookId = matchData[1];
   }
 
-  console.log("Notebook ID : ", notebookId);
+  // console.log("Notebook ID : ", notebookId);
 
   const html = fs.readFileSync(__dirname + "/redirect.html", {
     encoding: "utf-8"
@@ -165,13 +165,13 @@ const startNewSession = (req, res) => {
 
   docker.createContainer(options, (err, container) => {
     const containerId = container.id;
-    console.log("Id of this container is " + containerId);
+    // console.log("Id of this container is " + containerId);
 
     container.start((err, data) => {
       if (err) console.log(err);
       container.inspect(container.id).then(data => {
         const IPAddress = data.NetworkSettings.IPAddress;
-        console.log("IP address of this container is: " + IPAddress);
+        // console.log("IP address of this container is: " + IPAddress);
 
         const containerURL = `http://${IPAddress}:${PORT}`;
 
@@ -210,7 +210,7 @@ const teardownZombieContainers = () => {
     client.hvals(SESSIONS_OBJ, (err, sessionData) => {
       const allSessionData = sessionData.map(val => JSON.parse(val));
       const sessionContainerIds = allSessionData.map(data => data.containerId);
-      log("session container Ids : ", sessionContainerIds);
+      // log("session container Ids : ", sessionContainerIds);
 
       // kill container if no session exists
       containers.forEach(containerInfo => {

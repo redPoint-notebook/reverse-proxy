@@ -224,7 +224,6 @@ const teardownZombieContainers = () => {
 
 const log = (...messages) => {
   let date = new Date();
-  messages = Array.from(messages);
   console.log("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
   console.log(String(date));
   messages.forEach(mesg => console.log(mesg));

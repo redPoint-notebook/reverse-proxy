@@ -93,7 +93,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         } else if (req.url === "/loadNotebook" && req.method === "GET") {
           // load notebook from session state if stashed notebookId
           helpers.loadNotebook(req, res);
-        } else {
+        } else if (req.headers.connection === "keep-alive") {
           helpers.log("Proxying request through websocket");
           helpers.log("REQUEST HEADERS INSIDE PROXY : ", req.headers);
           sessionData.lastVisited = Date.now();

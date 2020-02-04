@@ -76,8 +76,8 @@ const proxyServer = https.createServer(https_options, (req, res) => {
         helpers.log("Inside host !== ROOT", `HOST: ${host}`);
 
         if (req.method === "DELETE") {
-          helpers.log("Delete Request received");
           // server.js issues delete request to tear down a container session
+          helpers.log("Delete Request received");
           helpers.tearDown(req, res);
         } else if (
           req.method === "POST" &&
@@ -95,7 +95,7 @@ const proxyServer = https.createServer(https_options, (req, res) => {
           helpers.loadNotebook(req, res);
         } else {
           helpers.log("Proxying request through websocket");
-
+          helpers.log("REQUEST HEADERS INSIDE PROXY : ", req.headers);
           sessionData.lastVisited = Date.now();
           client.hset(
             SESSIONS_OBJ,

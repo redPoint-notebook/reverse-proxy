@@ -76,8 +76,8 @@ const loadNotebook = (collection, notebookId) => {
 };
 
 const saveNotebook = (collection, notebook) => {
-  return new Promise(resolve => {
-    const saveStatus = collection.updateOne(
+  return new Promise((resolve, reject) => {
+    collection.updateOne(
       { id: notebook.id },
       { $set: notebook },
       { upsert: true }, // updates if exists, else inserts new entry
@@ -87,11 +87,10 @@ const saveNotebook = (collection, notebook) => {
           reject();
         } else {
           console.log(`Mongo result of insertOne: ${result}`);
-          return result;
+          resolve(result);
         }
       }
     );
-    resolve(saveStatus);
   });
 };
 
